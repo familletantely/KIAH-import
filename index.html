@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KIAH Import</title>
+
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif;background:#f3f5fb;color:#111827}
+.login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:25px;background:linear-gradient(160deg,#2445a8,#6d8cff)}
+.login-card{background:white;width:100%;max-width:390px;border-radius:28px;padding:28px}
+.login-card h1{margin:0 0 25px;font-size:30px;color:#2445a8}
+input,select{width:100%;padding:15px;border:1px solid #d1d5db;border-radius:16px;margin:7px 0;background:white;font-size:16px}
+button{border:none;border-radius:16px;padding:13px 16px;font-weight:700;font-size:16px}
+.primary{width:100%;background:#2445a8;color:white;margin-top:8px}
+.error{color:red;margin-top:10px;font-size:13px}
+.app{display:none;padding-bottom:95px}
+.top{background:#2445a8;color:white;padding:18px 16px 24px;border-bottom-left-radius:28px;border-bottom-right-radius:28px}
+.top-row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.top h1{font-size:25px;margin:0}
+.top small{color:#dbe3ff}
+.user-btn{background:white;color:#2445a8;padding:9px 12px;border-radius:14px;font-size:13px}
+.container{padding:16px}
+.card{background:white;border-radius:24px;padding:18px;margin-bottom:15px;box-shadow:0 8px 24px rgba(15,23,42,.06)}
+.card h2{margin:0 0 12px;font-size:22px}
+.result{font-size:28px;font-weight:900;color:#3867e8;margin-top:10px}
+.tabs{position:fixed;bottom:12px;left:12px;right:12px;display:flex;gap:8px;z-index:20}
+.tabs button{flex:1;background:#e8ecf8;color:#475569}
+.tabs button.active{background:#4f74e8;color:white}
+.logout{position:fixed;right:14px;bottom:78px;background:#ef4444;color:white;z-index:30}
+.section{display:none}
+.section.active{display:block}
+.mode-buttons{display:flex;gap:8px;overflow-x:auto;padding:6px 0 12px}
+.mode-buttons button{white-space:nowrap;background:#eef2ff;color:#2445a8}
+.mode-buttons button.active{background:#2445a8;color:white}
+.article{border:1px solid #eef0f5;border-radius:22px;padding:14px;margin-top:12px;background:#fff}
+.article-head{display:flex;justify-content:space-between;gap:10px}
+.article-ref{font-weight:900;font-size:17px}
+.article-name{color:#374151;margin-top:4px}
+.badge{background:#eef2ff;color:#2445a8;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:800}
+.status-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-top:10px}
+.status{background:#f3f4f6;color:#374151;padding:9px 6px;border-radius:13px;font-size:12px}
+.status.done{background:#facc15;color:#3f2f00}
+.delete{background:#ef4444;color:white;width:100%;margin-top:10px}
+.count{color:#6b7280;font-size:14px;margin-bottom:6px}
+.download{background:#16a34a;color:white;margin-top:14px;width:100%}
+</style>
+</head>
+
+<body>
+
+<div id="loginScreen" class="login">
+  <div class="login-card">
+    <h1>KIAH Import</h1>
+    <input id="emailInput" type="email" placeholder="Email">
+    <input id="passwordInput" type="password" placeholder="Mot de passe">
+    <button class="primary" onclick="login()">Se connecter</button>
+    <div id="errorBox" class="error"></div>
+  </div>
+</div>
+
+<div id="app" class="app">
+
+  <div class="top">
+    <div class="top-row">
+      <button class="user-btn" onclick="changeUser()">Changer utilisateur</button>
+      <div style="text-align:right">
+        <h1>KIAH Import</h1>
+        <small id="currentUserLabel">Utilisateur</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <div id="sea" class="section active">
+      <div class="card">
+        <h2>Calcul SEA</h2>
+        <input id="cbm" type="number" placeholder="CBM" oninput="calcSea()">
+        <input id="prixCBM" type="number" value="360" placeholder="Prix CBM en dollar" oninput="calcSea()">
+        <input id="usd" type="number" value="4750" placeholder="Dollar en Ariary" oninput="calcSea()">
+        <div class="result" id="resultSea">0 Ar</div>
+      </div>
+    </div>
+
+    <div id="air" class="section">
+      <div class="card">
+        <h2>Calcul AIR</h2>
+        <input id="kg" type="number" placeholder="Poids Kg" oninput="calcAir()">
+        <input id="prixKg" type="number" value="69000" placeholder="Prix Kg" oninput="calcAir()">
+        <div class="result" id="resultAir">0</div>
+      </div>
+    </div>
+
+    <div id="list" class="section">
+      <div class="card">
+        <h2>Inscription article</h2>
+        <input id="refInput" placeholder="Référence article">
+        <input id="nameInput" placeholder="Nom de l’article">
+        <select id="modeInput">
+          <option>SEA</option>
+          <option>AIR</option>
+          <option>EXP</option>
+          <option>AIR BATT</option>
+          <option>AUTRE</option>
+        </select>
+        <button class="primary" onclick="addItem()">Ajouter</button>
+
+        <div id="modeButtons" class="mode-buttons"></div>
+        <div id="categoryTotal" class="count"></div>
+      </div>
+
+      <div id="listCapture" class="card">
+        <h2 id="listTitle">Liste articles</h2>
+        <input id="searchInput" placeholder="Recherche par référence ou nom" oninput="renderArticles()">
+        <div id="items"></div>
+        <button class="download" onclick="downloadCurrentList()">Télécharger liste PNG</button>
+      </div>
+    </div>
+
+  </div>
+
+  <button class="logout" onclick="logout()">Déconnexion</button>
+
+  <div class="tabs">
+    <button class="active" onclick="openTab('sea',this)">SEA</button>
+    <button onclick="openTab('air',this)">AIR</button>
+    <button onclick="openTab('list',this)">Articles</button>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-database.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyATZL0nUdSchECCaBhgr77qn2ZeFqAkKOs",
+  authDomain: "kiah-import.firebaseapp.com",
+  databaseURL: "https://kiah-import-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "kiah-import",
+  storageBucket: "kiah-import.firebasestorage.app",
+  messagingSenderId: "722760438358",
+  appId: "1:722760438358:web:aba00bedd603b568be61f7"
+};
+
+const appFirebase = initializeApp(firebaseConfig);
+const db = getDatabase(appFirebase);
+const auth = getAuth(appFirebase);
+
+const MODES = ["SEA","AIR","EXP","AIR BATT","AUTRE"];
+
+let currentUserKey = "";
+let currentUserEmail = "";
+let selectedUserKey = "GLOBAL";
+let selectedMode = "";
+let allUsers = {};
+let allArticles = {};
+let listenersStarted = false;
+
+function safeKey(email){
+  return email.replaceAll(".", "_").replaceAll("@", "_");
+}
+
+window.login = function(){
+  const email = document.getElementById("emailInput").value.trim();
+  const pass = document.getElementById("passwordInput").value;
+  document.getElementById("errorBox").innerText = "";
+
+  signInWithEmailAndPassword(auth,email,pass)
+  .catch((error)=>{
+    document.getElementById("errorBox").innerText = error.message;
+  });
+}
+
+window.logout = function(){ 
+  signOut(auth); 
+}
+
+onAuthStateChanged(auth, async (user)=>{
+  if(user){
+    currentUserEmail = user.email;
+    currentUserKey = safeKey(user.email);
+    selectedUserKey = currentUserKey;
+
+    await update(ref(db,"users/"+currentUserKey), {
+      email:user.email
+    });
+
+    document.getElementById("loginScreen").style.display="none";
+    document.getElementById("app").style.display="block";
+    document.getElementById("currentUserLabel").innerText = user.email;
+
+    if(!listenersStarted){
+      listenersStarted = true;
+      listenUsers();
+      listenArticles();
+    }
+  }else{
+    document.getElementById("app").style.display="none";
+    document.getElementById("loginScreen").style.display="flex";
+  }
+});
+
+function listenUsers(){
+  onValue(ref(db,"users"), snap=>{
+    allUsers = snap.val() || {};
+  });
+}
+
+function listenArticles(){
+  onValue(ref(db,"articles"), snap=>{
+    allArticles = snap.val() || {};
+    renderModeButtons();
+    renderArticles();
+  });
+}
+
+window.changeUser = function(){
+  let keys = ["GLOBAL"];
+  let labels = ["GLOBAL"];
+
+  Object.keys(allUsers).forEach(k=>{
+    keys.push(k);
+    labels.push(allUsers[k].email);
+  });
+
+  let message = "Choisir utilisateur :\n";
+  labels.forEach((label,i)=> message += `${i+1}. ${label}\n`);
+
+  let num = prompt(message);
+  let index = parseInt(num) - 1;
+
+  if(isNaN(index) || !keys[index]) return;
+
+  selectedUserKey = keys[index];
+  document.getElementById("currentUserLabel").innerText = labels[index];
+
+  selectedMode = "";
+  renderModeButtons();
+  renderArticles();
+}
+
+function getVisibleArticles(){
+  let result = [];
+
+  Object.keys(allArticles).forEach(id=>{
+    let item = allArticles[id];
+    item.id = id;
+
+    if(selectedUserKey === "GLOBAL" || item.userKey === selectedUserKey){
+      result.push(item);
+    }
+  });
+
+  return result;
+}
+
+function renderModeButtons(){
+  let articles = getVisibleArticles();
+  let counts = {};
+
+  articles.forEach(a=>{
+    counts[a.mode] = (counts[a.mode] || 0) + 1;
+  });
+
+  let box = document.getElementById("modeButtons");
+  box.innerHTML = "";
+
+  MODES.forEach(mode=>{
+    if(counts[mode]){
+      if(!selectedMode) selectedMode = mode;
+      box.innerHTML += `<button class="${selectedMode===mode?'active':''}" onclick="selectMode('${mode}')">${mode} (${counts[mode]})</button>`;
+    }
+  });
+
+  if(selectedMode && !counts[selectedMode]){
+    selectedMode = Object.keys(counts)[0] || "";
+  }
+}
+
+window.selectMode = function(mode){
+  selectedMode = mode;
+  renderModeButtons();
+  renderArticles();
+}
+
+window.addItem = function(){
+  let refVal = document.getElementById("refInput").value.trim();
+  let nameVal = document.getElementById("nameInput").value.trim();
+  let modeVal = document.getElementById("modeInput").value;
+
+  if(!refVal) return;
+
+  push(ref(db,"articles"),{
+    ref: refVal,
+    name: nameVal,
+    mode: modeVal,
+    achat: "",
+    depot: "",
+    expedie: "",
+    userKey: currentUserKey,
+    createdBy: currentUserEmail,
+    createdAt: Date.now()
+  });
+
+  document.getElementById("refInput").value = "";
+  document.getElementById("nameInput").value = "";
+  selectedMode = modeVal;
+}
+
+window.renderArticles = function(){
+  let search = document.getElementById("searchInput").value.toLowerCase().trim();
+  let articles = getVisibleArticles();
+
+  if(selectedMode){
+    articles = articles.filter(a=>a.mode === selectedMode);
+  }
+
+  if(search){
+    articles = articles.filter(a=>
+      (a.ref || "").toLowerCase().includes(search) ||
+      (a.name || "").toLowerCase().includes(search)
+    );
+  }
+
+  document.getElementById("listTitle").innerText = selectedMode ? `Liste ${selectedMode}` : "Liste articles";
+  document.getElementById("categoryTotal").innerText = selectedMode ? `Total ${selectedMode} : ${articles.length} article(s)` : "";
+
+  let box = document.getElementById("items");
+  box.innerHTML = "";
+
+  articles.forEach(item=>{
+    box.innerHTML += `
+      <div class="article">
+        <div class="article-head">
+          <div>
+            <div class="article-ref">${item.ref || ""}</div>
+            <div class="article-name">${item.name || ""}</div>
+            <div class="count">${item.createdBy || ""}</div>
+          </div>
+          <div class="badge">${item.mode || ""}</div>
+        </div>
+
+        <div class="status-grid">
+          <button class="status ${item.achat?'done':''}" onclick="editDate('${item.id}','achat','${item.achat || ""}')">Achat<br>${item.achat || "Date"}</button>
+          <button class="status ${item.depot?'done':''}" onclick="editDate('${item.id}','depot','${item.depot || ""}')">Dépôt<br>${item.depot || "Date"}</button>
+          <button class="status ${item.expedie?'done':''}" onclick="editDate('${item.id}','expedie','${item.expedie || ""}')">Expédié<br>${item.expedie || "Date"}</button>
+        </div>
+
+        <button class="delete" onclick="deleteArticle('${item.id}')">Supprimer</button>
+      </div>
+    `;
+  });
+}
+
+window.editDate = function(id,field,oldValue){
+  let date = prompt("Entrer ou modifier la date :", oldValue || "");
+  if(date === null) return;
+  update(ref(db,`articles/${id}`), {[field]: date.trim()});
+}
+
+window.deleteArticle = function(id){
+  if(confirm("Supprimer cet article définitivement ?")){
+    remove(ref(db,`articles/${id}`));
+  }
+}
+
+window.downloadCurrentList = function(){
+  html2canvas(document.getElementById("listCapture")).then(canvas=>{
+    let link = document.createElement("a");
+    link.download = `KIAH_${selectedMode || "liste"}.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  });
+}
+
+window.openTab = function(id,btn){
+  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+
+  document.querySelectorAll(".tabs button").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+}
+
+window.calcSea = function(){
+  let cbm = parseFloat(document.getElementById("cbm").value)||0;
+  let prix = parseFloat(document.getElementById("prixCBM").value)||0;
+  let usd = parseFloat(document.getElementById("usd").value)||0;
+  document.getElementById("resultSea").innerText = (cbm*prix*usd).toLocaleString("fr-FR")+" Ar";
+}
+
+window.calcAir = function(){
+  let kg = parseFloat(document.getElementById("kg").value)||0;
+  let prix = parseFloat(document.getElementById("prixKg").value)||0;
+  document.getElementById("resultAir").innerText = (kg*prix).toLocaleString("fr-FR");
+}
+</script>
+
+</body>
+</html>
