@@ -17,7 +17,7 @@ input,select{width:100%;padding:15px;border:1px solid #d1d5db;border-radius:16px
 button{border:none;border-radius:16px;padding:13px 16px;font-weight:700;font-size:16px}
 .primary{width:100%;background:#2445a8;color:white;margin-top:8px}
 .error{color:red;margin-top:10px;font-size:13px}
-.app{display:none;padding-bottom:110px}
+.app{display:none;padding-bottom:120px}
 .top{background:#2445a8;color:white;padding:18px 16px 24px;border-bottom-left-radius:28px;border-bottom-right-radius:28px}
 .top-row{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .top h1{font-size:25px;margin:0}
@@ -27,10 +27,10 @@ button{border:none;border-radius:16px;padding:13px 16px;font-weight:700;font-siz
 .card{background:white;border-radius:24px;padding:18px;margin-bottom:15px;box-shadow:0 8px 24px rgba(15,23,42,.06)}
 .card h2{margin:0 0 12px;font-size:22px}
 .result{font-size:28px;font-weight:900;color:#3867e8;margin-top:10px}
-.tabs{position:fixed;bottom:12px;left:8px;right:8px;display:flex;gap:6px;z-index:20}
-.tabs button{flex:1;background:#e8ecf8;color:#475569;padding:12px 5px;font-size:14px}
+.tabs{position:fixed;bottom:12px;left:8px;right:8px;display:flex;gap:6px;z-index:20;overflow-x:auto;padding-bottom:2px}
+.tabs button{flex:1;background:#e8ecf8;color:#475569;padding:12px 5px;font-size:13px;min-width:72px}
 .tabs button.active{background:#4f74e8;color:white}
-.logout{position:fixed;right:14px;bottom:78px;background:#ef4444;color:white;z-index:30}
+.logout{position:fixed;right:14px;bottom:82px;background:#ef4444;color:white;z-index:30}
 .section{display:none}
 .section.active{display:block}
 .mode-buttons,.date-buttons{display:flex;gap:8px;overflow-x:auto;padding:6px 0 12px}
@@ -40,7 +40,7 @@ button{border:none;border-radius:16px;padding:13px 16px;font-weight:700;font-siz
 .article-head{display:flex;justify-content:space-between;gap:10px}
 .article-ref{font-weight:900;font-size:17px}
 .article-name{color:#374151;margin-top:4px}
-.badge{background:#eef2ff;color:#2445a8;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:800}
+.badge{background:#eef2ff;color:#2445a8;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:800;height:max-content}
 .status-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-top:10px}
 .status{background:#f3f4f6;color:#374151;padding:9px 6px;border-radius:13px;font-size:12px}
 .status.done{background:#facc15;color:#3f2f00}
@@ -49,6 +49,11 @@ button{border:none;border-radius:16px;padding:13px 16px;font-weight:700;font-siz
 .count{color:#6b7280;font-size:14px;margin-bottom:6px}
 .download{background:#16a34a;color:white;margin-top:14px;width:100%}
 .empty{color:#6b7280;text-align:center;padding:20px}
+.ship-box{margin-top:12px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:18px;padding:12px}
+.ship-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:center}
+.ship-row input{margin:0;padding:12px;border-radius:14px}
+.ship-result{font-weight:900;color:#2445a8;text-align:right}
+.summary-box{margin-top:16px;background:#eef2ff;color:#1e3a8a;border-radius:18px;padding:14px;font-weight:900;line-height:1.7}
 </style>
 </head>
 
@@ -81,9 +86,9 @@ button{border:none;border-radius:16px;padding:13px 16px;font-weight:700;font-siz
     <div id="sea" class="section active">
       <div class="card">
         <h2>Calcul SEA</h2>
-        <input id="cbm" type="number" placeholder="CBM" oninput="calcSea()">
-        <input id="prixCBM" type="number" value="360" placeholder="Prix CBM en dollar" oninput="calcSea()">
-        <input id="usd" type="number" value="4750" placeholder="Dollar en Ariary" oninput="calcSea()">
+        <input id="cbm" type="number" placeholder="CBM" oninput="calcSea(); renderExpeditions();">
+        <input id="prixCBM" type="number" value="360" placeholder="Prix CBM en dollar" oninput="calcSea(); renderExpeditions();">
+        <input id="usd" type="number" value="4750" placeholder="Dollar en Ariary" oninput="calcSea(); renderExpeditions();">
         <div class="result" id="resultSea">0 Ar</div>
       </div>
     </div>
@@ -91,9 +96,27 @@ button{border:none;border-radius:16px;padding:13px 16px;font-weight:700;font-siz
     <div id="air" class="section">
       <div class="card">
         <h2>Calcul AIR</h2>
-        <input id="kg" type="number" placeholder="Poids Kg" oninput="calcAir()">
-        <input id="prixKg" type="number" value="69000" placeholder="Prix Kg" oninput="calcAir()">
-        <div class="result" id="resultAir">0</div>
+        <input id="kg" type="number" placeholder="Poids Kg" oninput="calcAir(); renderExpeditions();">
+        <input id="prixKg" type="number" value="69000" placeholder="Prix Kg" oninput="calcAir(); renderExpeditions();">
+        <div class="result" id="resultAir">0 Ar</div>
+      </div>
+    </div>
+
+    <div id="exp" class="section">
+      <div class="card">
+        <h2>Calcul EXP</h2>
+        <input id="kgExp" type="number" placeholder="Poids Kg" oninput="calcExp(); renderExpeditions();">
+        <input id="prixKgExp" type="number" value="80000" placeholder="Prix Kg EXP" oninput="calcExp(); renderExpeditions();">
+        <div class="result" id="resultExp">0 Ar</div>
+      </div>
+    </div>
+
+    <div id="airbatt" class="section">
+      <div class="card">
+        <h2>Calcul AIR BATT</h2>
+        <input id="kgAirBatt" type="number" placeholder="Poids Kg" oninput="calcAirBatt(); renderExpeditions();">
+        <input id="prixKgAirBatt" type="number" value="120000" placeholder="Prix Kg AIR BATT" oninput="calcAirBatt(); renderExpeditions();">
+        <div class="result" id="resultAirBatt">0 Ar</div>
       </div>
     </div>
 
@@ -131,9 +154,13 @@ button{border:none;border-radius:16px;padding:13px 16px;font-weight:700;font-siz
         <div id="expTotal" class="count"></div>
       </div>
 
-      <div class="card">
+      <div id="expCapture" class="card">
         <h2 id="expTitle">Liste expédiée</h2>
         <div id="expItems"></div>
+        <div id="expSummary"></div>
+        <button id="downloadExpBtn" class="download" onclick="downloadCurrentExpedition()" style="display:none;">
+          Capturer cette liste PNG
+        </button>
         <button id="deleteAllExpBtn" class="delete-all" onclick="deleteAllCurrentExpedition()" style="display:none;">
           Supprimer tout cette liste
         </button>
@@ -147,6 +174,8 @@ button{border:none;border-radius:16px;padding:13px 16px;font-weight:700;font-siz
   <div class="tabs">
     <button class="active" onclick="openTab('sea',this)">SEA</button>
     <button onclick="openTab('air',this)">AIR</button>
+    <button onclick="openTab('exp',this)">EXP</button>
+    <button onclick="openTab('airbatt',this)">AIR BATT</button>
     <button onclick="openTab('list',this)">Articles</button>
     <button onclick="openTab('expeditions',this)">Expéditions</button>
   </div>
@@ -172,6 +201,7 @@ const db = getDatabase(appFirebase);
 const auth = getAuth(appFirebase);
 
 const MODES = ["SEA","AIR","EXP","AIR BATT","AUTRE"];
+const WEIGHT_MODES = ["AIR","EXP","AIR BATT"];
 
 let currentUserKey = "";
 let currentUserEmail = "";
@@ -185,6 +215,22 @@ let listenersStarted = false;
 
 function safeKey(email){
   return email.replaceAll(".", "_").replaceAll("@", "_");
+}
+
+function formatAr(value){
+  return Math.round(value || 0).toLocaleString("fr-FR") + " Ar";
+}
+
+function getSeaPricePerCbm(){
+  let prix = parseFloat(document.getElementById("prixCBM").value)||0;
+  let usd = parseFloat(document.getElementById("usd").value)||0;
+  return prix * usd;
+}
+
+function getKgPrice(mode){
+  if(mode === "EXP") return parseFloat(document.getElementById("prixKgExp").value)||0;
+  if(mode === "AIR BATT") return parseFloat(document.getElementById("prixKgAirBatt").value)||0;
+  return parseFloat(document.getElementById("prixKg").value)||0;
 }
 
 window.login = function(){
@@ -277,7 +323,7 @@ function getVisibleArticles(){
   let result = [];
 
   Object.keys(allArticles).forEach(id=>{
-    let item = allArticles[id];
+    let item = {...allArticles[id]};
     item.id = id;
 
     if(selectedUserKey === "GLOBAL" || item.userKey === selectedUserKey){
@@ -474,15 +520,44 @@ function renderExpeditions(){
   document.getElementById("expTotal").innerText = selectedExpMode && selectedExpDate ? `Total : ${articles.length} article(s)` : "";
 
   let box = document.getElementById("expItems");
+  let summary = document.getElementById("expSummary");
   box.innerHTML = "";
+  summary.innerHTML = "";
 
   if(!articles.length){
     box.innerHTML = `<div class="empty">Aucune expédition disponible</div>`;
     document.getElementById("deleteAllExpBtn").style.display = "none";
+    document.getElementById("downloadExpBtn").style.display = "none";
     return;
   }
 
+  let totalCbm = 0;
+  let totalKg = 0;
+  let totalPrice = 0;
+
   articles.forEach(item=>{
+    let mode = item.mode || "";
+    let value = 0;
+    let price = 0;
+    let inputHtml = "";
+    let resultHtml = "";
+
+    if(mode === "SEA"){
+      value = parseFloat(item.expCbm) || 0;
+      price = value * getSeaPricePerCbm();
+      totalCbm += value;
+      totalPrice += price;
+      inputHtml = `<input type="number" step="0.01" value="${item.expCbm || ""}" placeholder="CBM" onchange="updateShippingValue('${item.id}','expCbm',this.value)">`;
+      resultHtml = `<div class="ship-result">${value.toLocaleString("fr-FR")} CBM<br>${formatAr(price)}</div>`;
+    }else if(WEIGHT_MODES.includes(mode)){
+      value = parseFloat(item.expKg) || 0;
+      price = value * getKgPrice(mode);
+      totalKg += value;
+      totalPrice += price;
+      inputHtml = `<input type="number" step="0.01" value="${item.expKg || ""}" placeholder="Kg" onchange="updateShippingValue('${item.id}','expKg',this.value)">`;
+      resultHtml = `<div class="ship-result">${value.toLocaleString("fr-FR")} Kg<br>${formatAr(price)}</div>`;
+    }
+
     box.innerHTML += `
       <div class="article">
         <div class="article-head">
@@ -492,13 +567,50 @@ function renderExpeditions(){
             <div class="count">Expédié : ${item.expedie || ""}</div>
             <div class="count">${item.createdBy || ""}</div>
           </div>
-          <div class="badge">${item.mode || ""}</div>
+          <div class="badge">${mode}</div>
         </div>
+        ${mode === "SEA" || WEIGHT_MODES.includes(mode) ? `
+          <div class="ship-box">
+            <div class="ship-row">
+              ${inputHtml}
+              ${resultHtml}
+            </div>
+          </div>
+        ` : ""}
       </div>
     `;
   });
 
+  if(selectedExpMode === "SEA"){
+    summary.innerHTML = `
+      <div class="summary-box">
+        Total articles : ${articles.length}<br>
+        CBM total : ${totalCbm.toLocaleString("fr-FR")} CBM<br>
+        Prix total : ${formatAr(totalPrice)}
+      </div>
+    `;
+  }else if(WEIGHT_MODES.includes(selectedExpMode)){
+    summary.innerHTML = `
+      <div class="summary-box">
+        Total articles : ${articles.length}<br>
+        Kg total : ${totalKg.toLocaleString("fr-FR")} Kg<br>
+        Prix total : ${formatAr(totalPrice)}
+      </div>
+    `;
+  }else{
+    summary.innerHTML = `
+      <div class="summary-box">
+        Total articles : ${articles.length}
+      </div>
+    `;
+  }
+
   document.getElementById("deleteAllExpBtn").style.display = "block";
+  document.getElementById("downloadExpBtn").style.display = "block";
+}
+
+window.updateShippingValue = function(id,field,value){
+  update(ref(db,`articles/${id}`), {[field]: value});
 }
 
 window.selectExpDate = function(date){
@@ -539,6 +651,15 @@ window.downloadCurrentList = function(){
   });
 }
 
+window.downloadCurrentExpedition = function(){
+  html2canvas(document.getElementById("expCapture")).then(canvas=>{
+    let link = document.createElement("a");
+    link.download = `KIAH_Expedition_${selectedExpMode || "liste"}_${selectedExpDate || "date"}.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  });
+}
+
 window.openTab = function(id,btn){
   document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
@@ -556,13 +677,25 @@ window.calcSea = function(){
   let cbm = parseFloat(document.getElementById("cbm").value)||0;
   let prix = parseFloat(document.getElementById("prixCBM").value)||0;
   let usd = parseFloat(document.getElementById("usd").value)||0;
-  document.getElementById("resultSea").innerText = (cbm*prix*usd).toLocaleString("fr-FR")+" Ar";
+  document.getElementById("resultSea").innerText = formatAr(cbm*prix*usd);
 }
 
 window.calcAir = function(){
   let kg = parseFloat(document.getElementById("kg").value)||0;
   let prix = parseFloat(document.getElementById("prixKg").value)||0;
-  document.getElementById("resultAir").innerText = (kg*prix).toLocaleString("fr-FR");
+  document.getElementById("resultAir").innerText = formatAr(kg*prix);
+}
+
+window.calcExp = function(){
+  let kg = parseFloat(document.getElementById("kgExp").value)||0;
+  let prix = parseFloat(document.getElementById("prixKgExp").value)||0;
+  document.getElementById("resultExp").innerText = formatAr(kg*prix);
+}
+
+window.calcAirBatt = function(){
+  let kg = parseFloat(document.getElementById("kgAirBatt").value)||0;
+  let prix = parseFloat(document.getElementById("prixKgAirBatt").value)||0;
+  document.getElementById("resultAirBatt").innerText = formatAr(kg*prix);
 }
 </script>
 
