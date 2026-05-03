@@ -17,7 +17,7 @@ input,select{width:100%;padding:15px;border:1px solid #d1d5db;border-radius:16px
 button{border:none;border-radius:16px;padding:13px 16px;font-weight:700;font-size:16px}
 .primary{width:100%;background:#2445a8;color:white;margin-top:8px}
 .error{color:red;margin-top:10px;font-size:13px}
-.app{display:none;padding-bottom:95px}
+.app{display:none;padding-bottom:110px}
 .top{background:#2445a8;color:white;padding:18px 16px 24px;border-bottom-left-radius:28px;border-bottom-right-radius:28px}
 .top-row{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .top h1{font-size:25px;margin:0}
@@ -27,15 +27,15 @@ button{border:none;border-radius:16px;padding:13px 16px;font-weight:700;font-siz
 .card{background:white;border-radius:24px;padding:18px;margin-bottom:15px;box-shadow:0 8px 24px rgba(15,23,42,.06)}
 .card h2{margin:0 0 12px;font-size:22px}
 .result{font-size:28px;font-weight:900;color:#3867e8;margin-top:10px}
-.tabs{position:fixed;bottom:12px;left:12px;right:12px;display:flex;gap:8px;z-index:20}
-.tabs button{flex:1;background:#e8ecf8;color:#475569}
+.tabs{position:fixed;bottom:12px;left:8px;right:8px;display:flex;gap:6px;z-index:20}
+.tabs button{flex:1;background:#e8ecf8;color:#475569;padding:12px 5px;font-size:14px}
 .tabs button.active{background:#4f74e8;color:white}
 .logout{position:fixed;right:14px;bottom:78px;background:#ef4444;color:white;z-index:30}
 .section{display:none}
 .section.active{display:block}
-.mode-buttons{display:flex;gap:8px;overflow-x:auto;padding:6px 0 12px}
-.mode-buttons button{white-space:nowrap;background:#eef2ff;color:#2445a8}
-.mode-buttons button.active{background:#2445a8;color:white}
+.mode-buttons,.date-buttons{display:flex;gap:8px;overflow-x:auto;padding:6px 0 12px}
+.mode-buttons button,.date-buttons button{white-space:nowrap;background:#eef2ff;color:#2445a8}
+.mode-buttons button.active,.date-buttons button.active{background:#2445a8;color:white}
 .article{border:1px solid #eef0f5;border-radius:22px;padding:14px;margin-top:12px;background:#fff}
 .article-head{display:flex;justify-content:space-between;gap:10px}
 .article-ref{font-weight:900;font-size:17px}
@@ -45,8 +45,10 @@ button{border:none;border-radius:16px;padding:13px 16px;font-weight:700;font-siz
 .status{background:#f3f4f6;color:#374151;padding:9px 6px;border-radius:13px;font-size:12px}
 .status.done{background:#facc15;color:#3f2f00}
 .delete{background:#ef4444;color:white;width:100%;margin-top:10px}
+.delete-all{background:#b91c1c;color:white;width:100%;margin-top:18px}
 .count{color:#6b7280;font-size:14px;margin-bottom:6px}
 .download{background:#16a34a;color:white;margin-top:14px;width:100%}
+.empty{color:#6b7280;text-align:center;padding:20px}
 </style>
 </head>
 
@@ -121,6 +123,23 @@ button{border:none;border-radius:16px;padding:13px 16px;font-weight:700;font-siz
       </div>
     </div>
 
+    <div id="expeditions" class="section">
+      <div class="card">
+        <h2>Expéditions</h2>
+        <div id="expModeButtons" class="mode-buttons"></div>
+        <div id="expDateButtons" class="date-buttons"></div>
+        <div id="expTotal" class="count"></div>
+      </div>
+
+      <div class="card">
+        <h2 id="expTitle">Liste expédiée</h2>
+        <div id="expItems"></div>
+        <button id="deleteAllExpBtn" class="delete-all" onclick="deleteAllCurrentExpedition()" style="display:none;">
+          Supprimer tout cette liste
+        </button>
+      </div>
+    </div>
+
   </div>
 
   <button class="logout" onclick="logout()">Déconnexion</button>
@@ -129,6 +148,7 @@ button{border:none;border-radius:16px;padding:13px 16px;font-weight:700;font-siz
     <button class="active" onclick="openTab('sea',this)">SEA</button>
     <button onclick="openTab('air',this)">AIR</button>
     <button onclick="openTab('list',this)">Articles</button>
+    <button onclick="openTab('expeditions',this)">Expéditions</button>
   </div>
 </div>
 
@@ -157,6 +177,8 @@ let currentUserKey = "";
 let currentUserEmail = "";
 let selectedUserKey = "GLOBAL";
 let selectedMode = "";
+let selectedExpMode = "";
+let selectedExpDate = "";
 let allUsers = {};
 let allArticles = {};
 let listenersStarted = false;
@@ -216,6 +238,8 @@ function listenArticles(){
     allArticles = snap.val() || {};
     renderModeButtons();
     renderArticles();
+    renderExpeditionModeButtons();
+    renderExpeditions();
   });
 }
 
@@ -240,8 +264,13 @@ window.changeUser = function(){
   document.getElementById("currentUserLabel").innerText = labels[index];
 
   selectedMode = "";
+  selectedExpMode = "";
+  selectedExpDate = "";
+
   renderModeButtons();
   renderArticles();
+  renderExpeditionModeButtons();
+  renderExpeditions();
 }
 
 function getVisibleArticles(){
@@ -259,6 +288,7 @@ function getVisibleArticles(){
   return result;
 }
 
+/* ARTICLES */
 function renderModeButtons(){
   let articles = getVisibleArticles();
   let counts = {};
@@ -346,9 +376,9 @@ window.renderArticles = function(){
         </div>
 
         <div class="status-grid">
-          <button class="status ${item.achat?'done':''}" onclick="editDate('${item.id}','achat','${item.achat || ""}')">Achat<br>${item.achat || "Date"}</button>
-          <button class="status ${item.depot?'done':''}" onclick="editDate('${item.id}','depot','${item.depot || ""}')">Dépôt<br>${item.depot || "Date"}</button>
-          <button class="status ${item.expedie?'done':''}" onclick="editDate('${item.id}','expedie','${item.expedie || ""}')">Expédié<br>${item.expedie || "Date"}</button>
+          <button class="status ${item.achat?'done':''}" onclick="editDate('${item.id}','achat')">Achat<br>${item.achat || "Date"}</button>
+          <button class="status ${item.depot?'done':''}" onclick="editDate('${item.id}','depot')">Dépôt<br>${item.depot || "Date"}</button>
+          <button class="status ${item.expedie?'done':''}" onclick="editDate('${item.id}','expedie')">Expédié<br>${item.expedie || "Date"}</button>
         </div>
 
         <button class="delete" onclick="deleteArticle('${item.id}')">Supprimer</button>
@@ -357,8 +387,9 @@ window.renderArticles = function(){
   });
 }
 
-window.editDate = function(id,field,oldValue){
-  let date = prompt("Entrer ou modifier la date :", oldValue || "");
+window.editDate = function(id,field){
+  let oldValue = allArticles[id]?.[field] || "";
+  let date = prompt("Entrer ou modifier la date :", oldValue);
   if(date === null) return;
   update(ref(db,`articles/${id}`), {[field]: date.trim()});
 }
@@ -369,6 +400,136 @@ window.deleteArticle = function(id){
   }
 }
 
+/* EXPEDITIONS */
+function getShippedArticles(){
+  return getVisibleArticles().filter(a => (a.expedie || "").trim() !== "");
+}
+
+function renderExpeditionModeButtons(){
+  let articles = getShippedArticles();
+  let counts = {};
+
+  articles.forEach(a=>{
+    counts[a.mode] = (counts[a.mode] || 0) + 1;
+  });
+
+  let box = document.getElementById("expModeButtons");
+  box.innerHTML = "";
+
+  MODES.forEach(mode=>{
+    if(counts[mode]){
+      if(!selectedExpMode) selectedExpMode = mode;
+      box.innerHTML += `<button class="${selectedExpMode===mode?'active':''}" onclick="selectExpMode('${mode}')">${mode} (${counts[mode]})</button>`;
+    }
+  });
+
+  if(selectedExpMode && !counts[selectedExpMode]){
+    selectedExpMode = Object.keys(counts)[0] || "";
+    selectedExpDate = "";
+  }
+}
+
+window.selectExpMode = function(mode){
+  selectedExpMode = mode;
+  selectedExpDate = "";
+  renderExpeditionModeButtons();
+  renderExpeditions();
+}
+
+function renderExpeditions(){
+  let articles = getShippedArticles();
+
+  if(selectedExpMode){
+    articles = articles.filter(a=>a.mode === selectedExpMode);
+  }
+
+  let dateCounts = {};
+  articles.forEach(a=>{
+    let d = (a.expedie || "").trim();
+    dateCounts[d] = (dateCounts[d] || 0) + 1;
+  });
+
+  let dateBox = document.getElementById("expDateButtons");
+  dateBox.innerHTML = "";
+
+  let dates = Object.keys(dateCounts);
+
+  if(selectedExpDate && !dateCounts[selectedExpDate]){
+    selectedExpDate = "";
+  }
+
+  if(!selectedExpDate && dates.length){
+    selectedExpDate = dates[0];
+  }
+
+  dates.forEach(date=>{
+    dateBox.innerHTML += `<button class="${selectedExpDate===date?'active':''}" onclick="selectExpDate('${date}')">${date} (${dateCounts[date]})</button>`;
+  });
+
+  if(selectedExpDate){
+    articles = articles.filter(a=>(a.expedie || "").trim() === selectedExpDate);
+  }
+
+  document.getElementById("expTitle").innerText = selectedExpMode && selectedExpDate ? `Expéditions ${selectedExpMode} - ${selectedExpDate}` : "Liste expédiée";
+  document.getElementById("expTotal").innerText = selectedExpMode && selectedExpDate ? `Total : ${articles.length} article(s)` : "";
+
+  let box = document.getElementById("expItems");
+  box.innerHTML = "";
+
+  if(!articles.length){
+    box.innerHTML = `<div class="empty">Aucune expédition disponible</div>`;
+    document.getElementById("deleteAllExpBtn").style.display = "none";
+    return;
+  }
+
+  articles.forEach(item=>{
+    box.innerHTML += `
+      <div class="article">
+        <div class="article-head">
+          <div>
+            <div class="article-ref">${item.ref || ""}</div>
+            <div class="article-name">${item.name || ""}</div>
+            <div class="count">Expédié : ${item.expedie || ""}</div>
+            <div class="count">${item.createdBy || ""}</div>
+          </div>
+          <div class="badge">${item.mode || ""}</div>
+        </div>
+      </div>
+    `;
+  });
+
+  document.getElementById("deleteAllExpBtn").style.display = "block";
+}
+
+window.selectExpDate = function(date){
+  selectedExpDate = date;
+  renderExpeditions();
+}
+
+window.deleteAllCurrentExpedition = function(){
+  if(!selectedExpMode || !selectedExpDate) return;
+
+  let articles = getShippedArticles()
+    .filter(a=>a.mode === selectedExpMode)
+    .filter(a=>(a.expedie || "").trim() === selectedExpDate);
+
+  if(!articles.length) return;
+
+  let ok = confirm(`Supprimer définitivement ${articles.length} article(s) de ${selectedExpMode} du ${selectedExpDate} ?`);
+  if(!ok) return;
+
+  let verification = prompt(`Pour confirmer, écris SUPPRIMER`);
+  if(verification !== "SUPPRIMER"){
+    alert("Suppression annulée");
+    return;
+  }
+
+  articles.forEach(a=>{
+    remove(ref(db,`articles/${a.id}`));
+  });
+}
+
+/* AUTRES */
 window.downloadCurrentList = function(){
   html2canvas(document.getElementById("listCapture")).then(canvas=>{
     let link = document.createElement("a");
@@ -384,6 +545,11 @@ window.openTab = function(id,btn){
 
   document.querySelectorAll(".tabs button").forEach(b=>b.classList.remove("active"));
   btn.classList.add("active");
+
+  if(id === "expeditions"){
+    renderExpeditionModeButtons();
+    renderExpeditions();
+  }
 }
 
 window.calcSea = function(){
