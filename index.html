@@ -1,271 +1,300 @@
-<!DOCTYPE html>
+from pathlib import Path
+from PIL import Image, ImageOps
+import base64, io, os, re
+
+# Source photos uploaded by the user
+photo_paths = [
+    "/mnt/data/ED1C83CD-6BE0-46DD-9D09-B721C47B0AFD.jpeg",
+    "/mnt/data/61D31351-582F-4C26-B89C-AC5D38FD98E0.jpeg",
+    "/mnt/data/47253543-01B8-411D-ACD1-BAD9447DC0DA.jpeg",
+    "/mnt/data/C3B8B411-A85D-4B18-ACE3-B90D44E74426.jpeg",
+    "/mnt/data/BD26B898-6275-4984-AD84-5F4446B58D33.jpeg",
+    "/mnt/data/66318276-0B37-4510-80F8-D7E34F888DC5.jpeg",
+    "/mnt/data/D9C39962-808F-4F34-825F-E301175B0AF6.jpeg",
+]
+
+def img_to_data_uri(path, max_w=1200, quality=72):
+    im = Image.open(path)
+    im = ImageOps.exif_transpose(im).convert("RGB")
+    w,h = im.size
+    if w > max_w:
+        nh = int(h * max_w / w)
+        im = im.resize((max_w, nh), Image.LANCZOS)
+    buf = io.BytesIO()
+    im.save(buf, format="JPEG", quality=quality, optimize=True, progressive=True)
+    b64 = base64.b64encode(buf.getvalue()).decode("ascii")
+    return f"data:image/jpeg;base64,{b64}", im.size, len(buf.getvalue())
+
+# Use 4 best fitting photos, compressed
+hero1, _, _ = img_to_data_uri(photo_paths[0], 1100, 70)  # Guangzhou night / kids statue
+hero2, _, _ = img_to_data_uri(photo_paths[2], 1100, 70)  # night rabbit / family
+login_img, _, _ = img_to_data_uri(photo_paths[3], 1000, 70) # family cafe
+travel_img, _, _ = img_to_data_uri(photo_paths[5], 1000, 70) # river selfie
+
+html = f'''<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KIAH Import</title>
+<title>KIAH Import — Travel Edition</title>
 
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
 <style>
-:root{
-  --bg:#050914;
-  --bg2:#081326;
-  --card:rgba(13,28,54,.72);
-  --card2:rgba(9,19,39,.86);
-  --line:rgba(120,185,255,.22);
-  --text:#eef7ff;
-  --muted:#9eb6d3;
-  --cyan:#18d7ff;
-  --blue:#2563ff;
-  --violet:#9b4dff;
-  --pink:#ff3fb4;
-  --orange:#ff9f1c;
-  --red:#ff3f5f;
-  --green:#28e18f;
-  --shadow:0 18px 55px rgba(0,0,0,.42);
-}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{
+:root{{
+  --bg:#f5f1ea;
+  --paper:#fffaf2;
+  --paper2:#ffffff;
+  --ink:#1f2933;
+  --muted:#718096;
+  --line:rgba(86,70,50,.14);
+  --blue:#2563eb;
+  --sky:#0ea5e9;
+  --navy:#0f2742;
+  --gold:#d99a27;
+  --warm:#f59e0b;
+  --green:#10b981;
+  --red:#ef4444;
+  --shadow:0 18px 45px rgba(31,41,51,.14);
+  --radius:24px;
+}}
+*{{box-sizing:border-box}}
+html{{scroll-behavior:smooth}}
+body{{
   margin:0;
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
-  color:var(--text);
+  color:var(--ink);
   background:
-    radial-gradient(circle at 15% 10%,rgba(24,215,255,.18),transparent 30%),
-    radial-gradient(circle at 85% 5%,rgba(255,63,180,.14),transparent 28%),
-    radial-gradient(circle at 50% 80%,rgba(155,77,255,.16),transparent 35%),
-    linear-gradient(160deg,#020611,#07162b 54%,#020611);
+    radial-gradient(circle at 15% 0%,rgba(14,165,233,.12),transparent 32%),
+    radial-gradient(circle at 90% 8%,rgba(245,158,11,.14),transparent 30%),
+    linear-gradient(180deg,#fffaf2,#f3eee4 55%,#edf5fb);
   min-height:100vh;
   overflow-x:hidden;
-}
-body:before{
+}}
+body:before{{
   content:"";
   position:fixed;
   inset:0;
   pointer-events:none;
-  background:
-    linear-gradient(rgba(24,215,255,.055) 1px, transparent 1px),
-    linear-gradient(90deg,rgba(24,215,255,.045) 1px, transparent 1px);
-  background-size:42px 42px;
+  background-image:
+    linear-gradient(rgba(15,39,66,.035) 1px, transparent 1px),
+    linear-gradient(90deg,rgba(15,39,66,.028) 1px, transparent 1px);
+  background-size:36px 36px;
   mask-image:linear-gradient(to bottom,rgba(0,0,0,.65),transparent 82%);
-  animation:gridMove 18s linear infinite;
-  z-index:-2;
-}
-body:after{
-  content:"广州进口  GUANGZHOU IMPORT";
-  position:fixed;
-  left:50%;
-  top:44%;
-  transform:translate(-50%,-50%) rotate(-10deg);
-  font-weight:900;
-  letter-spacing:8px;
-  color:rgba(24,215,255,.055);
-  font-size:clamp(34px,9vw,130px);
-  white-space:nowrap;
-  pointer-events:none;
   z-index:-1;
-}
-@keyframes gridMove{from{background-position:0 0}to{background-position:42px 84px}}
-@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-@keyframes glowPulse{0%,100%{box-shadow:0 0 18px rgba(24,215,255,.22)}50%{box-shadow:0 0 34px rgba(155,77,255,.34)}}
-@keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-@keyframes shine{from{transform:translateX(-120%)}to{transform:translateX(120%)}}
-
-.login{
+}}
+@keyframes fadeUp{{from{{opacity:0;transform:translateY(14px)}}to{{opacity:1;transform:translateY(0)}}}}
+@keyframes softFloat{{0%,100%{{transform:translateY(0)}}50%{{transform:translateY(-5px)}}}}
+@keyframes planeMove{{from{{transform:translateX(-90px)}}to{{transform:translateX(calc(100vw + 90px))}}}}
+.login{{
   min-height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:22px;
-}
-.login-card{
-  width:100%;
-  max-width:420px;
-  background:linear-gradient(145deg,rgba(14,31,59,.86),rgba(6,13,29,.9));
-  border:1px solid var(--line);
-  border-radius:30px;
-  padding:26px;
-  box-shadow:var(--shadow),0 0 38px rgba(24,215,255,.14);
-  backdrop-filter:blur(18px);
-  position:relative;
-  overflow:hidden;
-}
-.login-card:before,.card:before{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:linear-gradient(105deg,transparent 0%,rgba(255,255,255,.08) 45%,transparent 55%);
-  transform:translateX(-120%);
-  animation:shine 7s ease-in-out infinite;
-  pointer-events:none;
-}
-.logo-mark{
-  display:flex;
-  gap:12px;
-  align-items:center;
-  margin-bottom:16px;
-}
-.logo-icon{
-  width:54px;
-  height:54px;
-  border-radius:18px;
   display:grid;
-  place-items:center;
-  background:linear-gradient(135deg,rgba(24,215,255,.22),rgba(155,77,255,.2));
-  border:1px solid rgba(24,215,255,.42);
-  box-shadow:0 0 24px rgba(24,215,255,.18);
-  font-size:28px;
-}
-.logo-text h1{margin:0;font-size:26px;letter-spacing:.5px}
-.logo-text small{color:var(--cyan);letter-spacing:2px;font-size:11px}
-input,select,textarea{
+  grid-template-columns:1.15fr .85fr;
+  padding:20px;
+  gap:20px;
+}}
+.login-visual{{
+  border-radius:34px;
+  min-height:calc(100vh - 40px);
+  background:
+    linear-gradient(90deg,rgba(15,39,66,.82),rgba(15,39,66,.22)),
+    url("{login_img}") center/cover;
+  box-shadow:var(--shadow);
+  overflow:hidden;
+  position:relative;
+  padding:34px;
+  color:white;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+}}
+.login-visual:before{{
+  content:"✈";
+  position:absolute;
+  top:24px;
+  left:-80px;
+  font-size:42px;
+  opacity:.75;
+  animation:planeMove 14s linear infinite;
+}}
+.login-visual h1{{font-size:clamp(42px,7vw,82px);line-height:.95;margin:0;text-shadow:0 8px 30px rgba(0,0,0,.38)}}
+.login-visual p{{font-size:18px;max-width:520px;line-height:1.55;color:#e8f3ff}}
+.login-card{{
+  align-self:center;
+  width:100%;
+  max-width:430px;
+  justify-self:center;
+  background:rgba(255,250,242,.88);
+  border:1px solid rgba(255,255,255,.7);
+  border-radius:30px;
+  padding:28px;
+  box-shadow:var(--shadow);
+  backdrop-filter:blur(18px);
+  animation:fadeUp .45s ease;
+}}
+.logo-mark{{display:flex;gap:12px;align-items:center;margin-bottom:18px}}
+.logo-icon{{
+  width:58px;height:58px;border-radius:20px;
+  display:grid;place-items:center;
+  background:linear-gradient(135deg,#0ea5e9,#2563eb);
+  color:white;font-size:30px;
+  box-shadow:0 12px 28px rgba(37,99,235,.22);
+}}
+.logo-text h1{{margin:0;font-size:27px;color:var(--navy)}}
+.logo-text small{{color:var(--gold);letter-spacing:2px;font-size:11px;font-weight:900}}
+input,select,textarea{{
   width:100%;
   padding:14px 15px;
-  border:1px solid rgba(120,185,255,.22);
+  border:1px solid var(--line);
   border-radius:16px;
   margin:7px 0;
-  background:rgba(5,13,31,.76);
-  color:var(--text);
+  background:white;
+  color:var(--ink);
   outline:none;
   font-size:15px;
   transition:.22s;
-}
-textarea{min-height:86px;resize:vertical}
-input:focus,select:focus,textarea:focus{
-  border-color:rgba(24,215,255,.8);
-  box-shadow:0 0 0 4px rgba(24,215,255,.09),0 0 16px rgba(24,215,255,.18);
-}
-input::placeholder,textarea::placeholder{color:#7289a7}
-button{
+}}
+textarea{{min-height:86px;resize:vertical}}
+input:focus,select:focus,textarea:focus{{
+  border-color:rgba(37,99,235,.65);
+  box-shadow:0 0 0 4px rgba(37,99,235,.10);
+}}
+button{{
   border:none;
   border-radius:16px;
   padding:13px 16px;
-  font-weight:800;
+  font-weight:850;
   font-size:15px;
-  color:var(--text);
   cursor:pointer;
   transition:.22s ease;
-  position:relative;
-  overflow:hidden;
-}
-button:active{transform:scale(.97)}
-.primary{
+  color:var(--ink);
+}}
+button:active{{transform:scale(.98)}}
+.primary{{
   width:100%;
-  background:linear-gradient(135deg,var(--cyan),var(--blue),var(--violet));
-  box-shadow:0 12px 30px rgba(37,99,255,.28);
+  background:linear-gradient(135deg,#0ea5e9,#2563eb);
+  color:white;
+  box-shadow:0 12px 25px rgba(37,99,235,.22);
   margin-top:8px;
-}
-.secondary{
-  background:rgba(20,40,75,.84);
-  border:1px solid rgba(120,185,255,.2);
-  color:#dcecff;
-}
-.danger{background:linear-gradient(135deg,#ff315b,#9f1239);color:white}
-.success{background:linear-gradient(135deg,#0dd98d,#0284c7);color:white}
-.error{color:#ff7890;margin-top:10px;font-size:13px}
-.app{display:none;padding-bottom:110px;animation:slideUp .5s ease}
-.top{
-  padding:20px 16px 22px;
+}}
+.secondary{{
+  background:rgba(255,255,255,.72);
+  border:1px solid var(--line);
+  color:var(--navy);
+}}
+.danger{{background:linear-gradient(135deg,#ef4444,#b91c1c);color:white}}
+.success{{background:linear-gradient(135deg,#10b981,#0ea5e9);color:white}}
+.error{{color:#dc2626;margin-top:10px;font-size:13px}}
+.app{{display:none;padding-bottom:110px;animation:fadeUp .35s ease}}
+.top{{
+  padding:18px 18px 14px;
   position:sticky;
   top:0;
-  z-index:15;
-  backdrop-filter:blur(16px);
-  background:linear-gradient(180deg,rgba(4,9,22,.92),rgba(4,9,22,.65));
-  border-bottom:1px solid rgba(120,185,255,.14);
-}
-.top-row{display:flex;justify-content:space-between;align-items:center;gap:12px}
-.top h1{font-size:24px;margin:0}
-.top small{color:var(--muted)}
-.user-btn,.icon-btn{
-  background:rgba(12,26,53,.82);
-  border:1px solid rgba(120,185,255,.22);
-  color:#dff4ff;
-}
-.icon-btn{min-width:48px}
-.container{padding:16px;max-width:1180px;margin:auto}
-.section{display:none;animation:slideUp .28s ease}
-.section.active{display:block}
-.card{
-  background:linear-gradient(145deg,rgba(12,26,52,.78),rgba(5,12,28,.84));
-  border:1px solid rgba(120,185,255,.18);
-  border-radius:28px;
+  z-index:18;
+  backdrop-filter:blur(18px);
+  background:rgba(255,250,242,.82);
+  border-bottom:1px solid rgba(86,70,50,.10);
+}}
+.top-row{{display:flex;justify-content:space-between;align-items:center;gap:12px;max-width:1180px;margin:auto}}
+.top h1{{font-size:23px;margin:0;color:var(--navy)}}
+.top small{{color:var(--muted)}}
+.user-btn{{
+  background:white;
+  border:1px solid var(--line);
+  color:var(--navy);
+  box-shadow:0 8px 22px rgba(31,41,51,.07);
+}}
+.container{{padding:16px;max-width:1180px;margin:auto}}
+.section{{display:none;animation:fadeUp .25s ease}}
+.section.active{{display:block}}
+.card{{
+  background:rgba(255,255,255,.82);
+  border:1px solid rgba(255,255,255,.78);
+  border-radius:var(--radius);
   padding:18px;
   margin-bottom:16px;
-  box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.04);
-  backdrop-filter:blur(18px);
-  position:relative;
+  box-shadow:0 14px 36px rgba(31,41,51,.10);
+  backdrop-filter:blur(16px);
   overflow:hidden;
-}
-.card h2{margin:0 0 12px;font-size:21px}
-.card-title-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
-.hero{
-  min-height:190px;
-  border-radius:30px;
-  padding:22px;
+  position:relative;
+}}
+.card h2{{margin:0 0 12px;font-size:22px;color:var(--navy)}}
+.card-title-row{{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}}
+.hero{{
+  min-height:360px;
+  padding:26px;
+  color:white;
   background:
-    linear-gradient(180deg,rgba(2,6,17,.18),rgba(2,6,17,.72)),
-    radial-gradient(circle at 50% 20%,rgba(24,215,255,.18),transparent 38%),
-    linear-gradient(135deg,rgba(24,215,255,.12),rgba(155,77,255,.1));
-  border:1px solid rgba(24,215,255,.22);
-  overflow:hidden;
-}
-.hero h2{font-size:28px;margin:0 0 6px}
-.hero p{margin:0;color:#d3e6ff}
-.skyline{
-  height:88px;
-  margin-top:18px;
-  position:relative;
-  opacity:.95;
-  animation:floaty 5.5s ease-in-out infinite;
-}
-.tower,.building,.crane{
+    linear-gradient(90deg,rgba(15,39,66,.88),rgba(15,39,66,.28) 58%,rgba(15,39,66,.70)),
+    url("{hero1}") center/cover;
+  border:1px solid rgba(255,255,255,.65);
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+}}
+.hero:after{{
+  content:"";
   position:absolute;
-  bottom:0;
-  border:1px solid rgba(24,215,255,.58);
-  background:linear-gradient(180deg,rgba(24,215,255,.18),rgba(155,77,255,.06));
-  box-shadow:0 0 18px rgba(24,215,255,.2);
-}
-.tower{left:50%;width:18px;height:82px;border-radius:12px 12px 2px 2px}
-.tower:before{content:"";position:absolute;left:50%;top:-20px;width:2px;height:20px;background:var(--cyan)}
-.building:nth-child(1){left:6%;width:34px;height:44px}
-.building:nth-child(2){left:19%;width:46px;height:62px}
-.building:nth-child(3){left:34%;width:28px;height:50px}
-.building:nth-child(5){right:32%;width:42px;height:54px}
-.building:nth-child(6){right:17%;width:30px;height:72px}
-.building:nth-child(7){right:5%;width:48px;height:46px}
-.crane{left:8%;bottom:50px;width:90px;height:3px;background:var(--orange);border-color:rgba(255,159,28,.8);box-shadow:0 0 18px rgba(255,159,28,.35)}
-.crane:before{content:"";position:absolute;left:8px;top:3px;width:3px;height:36px;background:rgba(255,159,28,.9)}
-.neon-cn{
-  display:inline-block;
-  color:#ff68bf;
-  text-shadow:0 0 12px rgba(255,63,180,.72);
-  border:1px solid rgba(255,63,180,.4);
-  padding:7px 12px;
-  border-radius:14px;
-  margin-top:10px;
-  letter-spacing:2px;
-}
-.stat-grid{
+  inset:auto 22px 22px auto;
+  width:240px;height:160px;
+  background:url("{hero2}") center/cover;
+  border-radius:26px;
+  border:4px solid rgba(255,255,255,.82);
+  box-shadow:0 18px 45px rgba(0,0,0,.30);
+  transform:rotate(2deg);
+}}
+.hero h2{{font-size:clamp(32px,5vw,58px);margin:0 0 8px;color:white;text-shadow:0 10px 34px rgba(0,0,0,.45)}}
+.hero p{{margin:0;color:#eef7ff;font-size:17px;max-width:560px;line-height:1.55}}
+.tagline{{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:16px;
+}}
+.tag{{
+  background:rgba(255,255,255,.18);
+  color:white;
+  border:1px solid rgba(255,255,255,.34);
+  padding:9px 12px;
+  border-radius:999px;
+  font-weight:800;
+  backdrop-filter:blur(10px);
+}}
+.travel-card{{
+  margin-top:18px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  max-width:610px;
+}}
+.travel-card div{{
+  background:rgba(255,255,255,.16);
+  border:1px solid rgba(255,255,255,.30);
+  border-radius:18px;
+  padding:13px;
+  backdrop-filter:blur(10px);
+  font-weight:800;
+}}
+.stat-grid{{
   display:grid;
   grid-template-columns:repeat(4,1fr);
   gap:12px;
-}
-.stat-card{
+}}
+.stat-card{{
   border-radius:22px;
   padding:16px;
-  background:rgba(8,20,42,.75);
-  border:1px solid rgba(120,185,255,.18);
+  background:linear-gradient(145deg,rgba(255,255,255,.92),rgba(255,250,242,.84));
+  border:1px solid rgba(86,70,50,.10);
   min-height:112px;
-}
-.stat-card strong{display:block;font-size:29px;margin:7px 0}
-.stat-card small{color:var(--muted)}
-.cyan{border-color:rgba(24,215,255,.45);box-shadow:0 0 24px rgba(24,215,255,.08)}
-.violet{border-color:rgba(155,77,255,.45);box-shadow:0 0 24px rgba(155,77,255,.09)}
-.orange{border-color:rgba(255,159,28,.45);box-shadow:0 0 24px rgba(255,159,28,.09)}
-.red{border-color:rgba(255,63,95,.45);box-shadow:0 0 24px rgba(255,63,95,.09)}
-.green{border-color:rgba(40,225,143,.45);box-shadow:0 0 24px rgba(40,225,143,.09)}
-.tabs{
+}}
+.stat-card strong{{display:block;font-size:30px;margin:7px 0;color:var(--navy)}}
+.stat-card small{{color:var(--muted)}}
+.cyan{{border-left:5px solid #0ea5e9}}
+.violet{{border-left:5px solid #8b5cf6}}
+.orange{{border-left:5px solid #f59e0b}}
+.red{{border-left:5px solid #ef4444}}
+.green{{border-left:5px solid #10b981}}
+.tabs{{
   position:fixed;
   bottom:12px;
   left:10px;
@@ -276,564 +305,259 @@ button:active{transform:scale(.97)}
   z-index:30;
   padding:9px;
   border-radius:26px;
-  background:rgba(7,16,35,.88);
-  border:1px solid rgba(120,185,255,.22);
+  background:rgba(255,250,242,.90);
+  border:1px solid rgba(255,255,255,.84);
   backdrop-filter:blur(20px);
-  box-shadow:0 12px 40px rgba(0,0,0,.45),0 0 28px rgba(24,215,255,.1);
-}
-.tabs button{
+  box-shadow:0 18px 45px rgba(31,41,51,.18);
+}}
+.tabs button{{
   padding:10px 6px;
   min-height:58px;
   font-size:12px;
   background:transparent;
-  color:#9eb6d3;
+  color:#64748b;
   display:flex;
   flex-direction:column;
   gap:4px;
   align-items:center;
   justify-content:center;
-}
-.tabs button .ico{font-size:19px}
-.tabs button.active{
+}}
+.tabs button .ico{{font-size:19px}}
+.tabs button.active{{
   color:white;
-  background:linear-gradient(135deg,rgba(24,215,255,.24),rgba(155,77,255,.28));
-  box-shadow:0 0 22px rgba(24,215,255,.18);
-  border:1px solid rgba(24,215,255,.3);
-}
-.logout{
+  background:linear-gradient(135deg,#0ea5e9,#2563eb);
+  box-shadow:0 12px 28px rgba(37,99,235,.26);
+}}
+.logout{{
   position:fixed;
   right:14px;
   bottom:92px;
-  background:linear-gradient(135deg,#ff315b,#7f1d1d);
+  background:linear-gradient(135deg,#ef4444,#b91c1c);
   color:white;
   z-index:31;
-  border:1px solid rgba(255,255,255,.12);
-}
-.mode-buttons,.date-buttons,.filter-chips{
+  border:1px solid rgba(255,255,255,.28);
+  box-shadow:0 12px 28px rgba(239,68,68,.26);
+}}
+.mode-buttons,.date-buttons,.filter-chips{{
   display:flex;
   gap:8px;
   overflow-x:auto;
   padding:6px 0 12px;
   scrollbar-width:none;
-}
-.mode-buttons::-webkit-scrollbar,.date-buttons::-webkit-scrollbar,.filter-chips::-webkit-scrollbar{display:none}
-.mode-buttons button,.date-buttons button,.chip{
+}}
+.mode-buttons::-webkit-scrollbar,.date-buttons::-webkit-scrollbar,.filter-chips::-webkit-scrollbar{{display:none}}
+.mode-buttons button,.date-buttons button,.chip{{
   white-space:nowrap;
-  background:rgba(13,28,54,.78);
-  color:#cbe8ff;
-  border:1px solid rgba(120,185,255,.2);
+  background:white;
+  color:var(--navy);
+  border:1px solid var(--line);
   padding:11px 14px;
-}
-.mode-buttons button.active,.date-buttons button.active,.chip.active{
-  background:linear-gradient(135deg,rgba(24,215,255,.24),rgba(155,77,255,.28));
+}}
+.mode-buttons button.active,.date-buttons button.active,.chip.active{{
+  background:linear-gradient(135deg,#0ea5e9,#2563eb);
   color:white;
-  border-color:rgba(24,215,255,.55);
-  box-shadow:0 0 22px rgba(24,215,255,.12);
-}
-.frais-panel{display:grid;grid-template-columns:1fr 1.35fr;gap:14px}
-.frais-types{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.type-card{
-  min-height:102px;
+  border-color:transparent;
+}}
+.frais-panel{{display:grid;grid-template-columns:1fr 1.35fr;gap:14px}}
+.frais-types{{display:grid;grid-template-columns:1fr 1fr;gap:10px}}
+.type-card{{
+  min-height:104px;
   display:flex;
   flex-direction:column;
   justify-content:center;
   align-items:center;
   gap:8px;
-  background:rgba(8,20,42,.78);
-  border:1px solid rgba(120,185,255,.18);
+  background:white;
+  border:1px solid var(--line);
   border-radius:22px;
   font-weight:900;
-}
-.type-card.active{animation:glowPulse 2.4s ease-in-out infinite;border-color:rgba(24,215,255,.78)}
-.type-card span{font-size:30px}
-.result{
+}}
+.type-card.active{{border-color:#0ea5e9;box-shadow:0 12px 28px rgba(14,165,233,.18);background:#eef8ff}}
+.type-card span{{font-size:30px}}
+.result{{
   font-size:clamp(28px,7vw,46px);
   font-weight:950;
-  color:var(--cyan);
-  text-shadow:0 0 18px rgba(24,215,255,.24);
+  color:var(--blue);
   margin-top:12px;
   padding:16px;
   border-radius:20px;
-  background:rgba(24,215,255,.07);
-  border:1px solid rgba(24,215,255,.22);
-}
-.article-grid{
+  background:#eef8ff;
+  border:1px solid rgba(14,165,233,.18);
+}}
+.article-grid{{
   display:grid;
   grid-template-columns:repeat(5,1fr);
   gap:10px;
   margin-top:8px;
-}
-.category-card{
+}}
+.category-card{{
   border-radius:22px;
   padding:15px;
   min-height:118px;
-  background:rgba(8,20,42,.75);
-  border:1px solid rgba(120,185,255,.18);
+  background:white;
+  border:1px solid var(--line);
   cursor:pointer;
   transition:.25s;
-}
-.category-card:hover{transform:translateY(-3px)}
-.category-card.active{border-color:rgba(24,215,255,.72);box-shadow:0 0 26px rgba(24,215,255,.13)}
-.category-card .big{font-size:28px;font-weight:950;margin:8px 0}
-.search-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
-.article{
-  border:1px solid rgba(120,185,255,.16);
+}}
+.category-card:hover{{transform:translateY(-3px)}}
+.category-card.active{{border-color:#0ea5e9;box-shadow:0 14px 28px rgba(14,165,233,.14);background:#eef8ff}}
+.category-card .big{{font-size:28px;font-weight:950;margin:8px 0;color:var(--navy)}}
+.search-row{{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}}
+.article{{
+  border:1px solid var(--line);
   border-radius:22px;
   padding:14px;
   margin-top:10px;
-  background:linear-gradient(135deg,rgba(11,25,51,.86),rgba(5,12,28,.78));
+  background:rgba(255,255,255,.92);
   transition:.22s;
-  animation:slideUp .25s ease;
-}
-.article:hover{border-color:rgba(24,215,255,.38);transform:translateY(-2px)}
-.article.compact{
+  animation:fadeUp .25s ease;
+}}
+.article:hover{{transform:translateY(-2px);box-shadow:0 12px 28px rgba(31,41,51,.10)}}
+.article.compact{{
   display:grid;
   grid-template-columns:auto 1fr auto;
   gap:12px;
   align-items:center;
-}
-.article-icon{
+}}
+.article-icon{{
   width:50px;height:50px;border-radius:18px;
   display:grid;place-items:center;font-size:27px;
-  background:rgba(24,215,255,.09);
-  border:1px solid rgba(120,185,255,.22);
-}
-.article-ref{font-weight:950;font-size:16px}
-.article-name{color:#dcecff;margin-top:4px}
-.article-meta{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
-.badge{
+  background:#eef8ff;
+  border:1px solid rgba(14,165,233,.18);
+}}
+.article-ref{{font-weight:950;font-size:16px;color:var(--navy)}}
+.article-name{{color:#334155;margin-top:4px}}
+.article-meta{{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}}
+.badge{{
   display:inline-flex;
   align-items:center;
   gap:4px;
-  background:rgba(24,215,255,.1);
-  color:#8beeff;
-  border:1px solid rgba(24,215,255,.25);
+  background:#eef8ff;
+  color:#0369a1;
+  border:1px solid rgba(14,165,233,.18);
   border-radius:999px;
   padding:5px 9px;
   font-size:11px;
   font-weight:900;
-}
-.badge.air{background:rgba(155,77,255,.12);color:#d5b8ff;border-color:rgba(155,77,255,.3)}
-.badge.exp{background:rgba(255,159,28,.12);color:#ffc66b;border-color:rgba(255,159,28,.32)}
-.badge.batt{background:rgba(255,63,95,.12);color:#ff9aaa;border-color:rgba(255,63,95,.32)}
-.badge.autre{background:rgba(150,165,190,.12);color:#d5e3f7;border-color:rgba(150,165,190,.25)}
-.count{color:var(--muted);font-size:13px}
-.article-actions{display:flex;gap:8px;align-items:center}
-.action-mini{padding:10px 12px;font-size:13px;background:rgba(37,99,255,.28);border:1px solid rgba(37,99,255,.32)}
-.status-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px}
-.status{background:rgba(20,40,75,.76);border:1px solid rgba(120,185,255,.16);color:#dcecff;padding:10px 6px;border-radius:15px;font-size:12px}
-.status.done{background:rgba(40,225,143,.16);border-color:rgba(40,225,143,.32);color:#8dffc8}
-.empty{color:var(--muted);text-align:center;padding:22px}
-.ship-box{margin-top:12px;background:rgba(5,13,31,.58);border:1px solid rgba(120,185,255,.16);border-radius:18px;padding:12px}
-.ship-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:center}
-.ship-row input{margin:0}
-.ship-result{font-weight:950;color:var(--cyan);text-align:right}
-.summary-box{margin-top:16px;background:rgba(24,215,255,.08);border:1px solid rgba(24,215,255,.2);color:#dff8ff;border-radius:20px;padding:14px;font-weight:900;line-height:1.8}
-.modal{
+}}
+.badge.air{{background:#f3e8ff;color:#7e22ce;border-color:rgba(126,34,206,.16)}}
+.badge.exp{{background:#fff7ed;color:#c2410c;border-color:rgba(194,65,12,.16)}}
+.badge.batt{{background:#fff1f2;color:#be123c;border-color:rgba(190,18,60,.16)}}
+.badge.autre{{background:#f1f5f9;color:#475569;border-color:rgba(71,85,105,.12)}}
+.count{{color:var(--muted);font-size:13px}}
+.article-actions{{display:flex;gap:8px;align-items:center}}
+.action-mini{{padding:10px 12px;font-size:13px;background:#eef8ff;border:1px solid rgba(14,165,233,.20);color:var(--blue)}}
+.status-grid{{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px}}
+.status{{background:white;border:1px solid var(--line);color:var(--navy);padding:10px 6px;border-radius:15px;font-size:12px}}
+.status.done{{background:#ecfdf5;border-color:rgba(16,185,129,.25);color:#047857}}
+.empty{{color:var(--muted);text-align:center;padding:22px}}
+.ship-box{{margin-top:12px;background:#f8fafc;border:1px solid var(--line);border-radius:18px;padding:12px}}
+.ship-row{{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:center}}
+.ship-row input{{margin:0}}
+.ship-result{{font-weight:950;color:var(--blue);text-align:right}}
+.summary-box{{margin-top:16px;background:#eef8ff;border:1px solid rgba(14,165,233,.18);color:var(--navy);border-radius:20px;padding:14px;font-weight:900;line-height:1.8}}
+.photo-strip{{
+  display:grid;
+  grid-template-columns:1.2fr .8fr;
+  gap:14px;
+}}
+.photo-box{{
+  min-height:220px;
+  border-radius:24px;
+  background:linear-gradient(180deg,rgba(15,39,66,.05),rgba(15,39,66,.45)), url("{travel_img}") center/cover;
+  box-shadow:var(--shadow);
+  color:white;
+  padding:18px;
+  display:flex;
+  align-items:flex-end;
+  font-weight:900;
+}}
+.photo-box.small{{background-image:linear-gradient(180deg,rgba(15,39,66,.05),rgba(15,39,66,.45)), url("{hero2}")}}
+.modal{{
   display:none;
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,.65);
+  background:rgba(15,39,66,.58);
   z-index:80;
   padding:18px;
   align-items:center;
   justify-content:center;
   backdrop-filter:blur(10px);
-}
-.modal.show{display:flex}
-.modal-card{
+}}
+.modal.show{{display:flex}}
+.modal-card{{
   width:100%;
   max-width:560px;
   max-height:92vh;
   overflow:auto;
-  background:linear-gradient(145deg,rgba(12,26,52,.96),rgba(5,12,28,.98));
-  border:1px solid rgba(120,185,255,.26);
+  background:rgba(255,250,242,.96);
+  border:1px solid rgba(255,255,255,.8);
   border-radius:28px;
   padding:18px;
-  box-shadow:0 25px 80px rgba(0,0,0,.58),0 0 40px rgba(24,215,255,.14);
-  animation:slideUp .24s ease;
-}
-.modal-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.form-grid .full{grid-column:1/-1}
-label{display:block;color:var(--muted);font-size:12px;margin:8px 0 2px}
-.modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
-.download{background:linear-gradient(135deg,#0dd98d,#2563ff);color:white;margin-top:14px;width:100%}
-.delete-all{background:linear-gradient(135deg,#ff315b,#7f1d1d);color:white;width:100%;margin-top:12px}
-@media (max-width:800px){
-  .container{padding:12px}
-  .top{padding:16px 12px}
-  .top h1{font-size:20px}
-  .hero{min-height:180px;padding:18px}
-  .stat-grid{grid-template-columns:1fr 1fr}
-  .frais-panel{grid-template-columns:1fr}
-  .article-grid{grid-template-columns:1fr 1fr}
-  .article.compact{grid-template-columns:auto 1fr;align-items:start}
-  .article-actions{grid-column:1/-1}
-  .action-mini{width:100%}
-  .search-row{grid-template-columns:1fr}
-  .form-grid{grid-template-columns:1fr}
-  .tabs{bottom:8px;left:8px;right:8px;border-radius:22px}
-  .tabs button{font-size:11px;min-height:54px}
-  .logout{bottom:86px;right:10px;padding:10px 12px;font-size:12px}
-}
-@media (min-width:1000px){
-  .tabs{left:50%;transform:translateX(-50%);max-width:760px}
-}
-
-/* === LOGIN PREMIUM GRAND RECTANGLE - GUANGZHOU === */
-.login{
-  min-height:100vh;
-  padding:24px;
-  background:
-    radial-gradient(circle at 75% 20%,rgba(24,215,255,.18),transparent 28%),
-    radial-gradient(circle at 18% 78%,rgba(255,63,180,.15),transparent 28%),
-    linear-gradient(135deg,rgba(2,6,17,.72),rgba(5,10,28,.88)),
-    linear-gradient(160deg,#020611,#07162b 54%,#020611);
-}
-.login:before{
-  content:"";
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  background:
-    linear-gradient(180deg,rgba(3,7,18,.18),rgba(3,7,18,.82)),
-    radial-gradient(circle at 85% 42%,rgba(24,215,255,.22),transparent 20%),
-    radial-gradient(circle at 15% 45%,rgba(255,63,180,.18),transparent 22%);
-  z-index:0;
-}
-.login-card{
-  position:relative;
-  z-index:1;
-  max-width:1060px;
-  min-height:620px;
-  padding:0;
-  display:grid;
-  grid-template-columns:1.05fr .95fr;
-  border-radius:34px;
-  overflow:hidden;
-  background:rgba(5,12,30,.74);
-  border:1px solid rgba(24,215,255,.44);
-  box-shadow:
-    0 30px 90px rgba(0,0,0,.58),
-    0 0 0 1px rgba(155,77,255,.22),
-    0 0 55px rgba(24,215,255,.18),
-    inset 0 1px 0 rgba(255,255,255,.06);
-  backdrop-filter:blur(22px);
-}
-.login-card:after{
-  content:"";
-  position:absolute;
-  inset:-2px;
-  background:linear-gradient(120deg,rgba(24,215,255,.8),transparent 28%,rgba(255,63,180,.7),transparent 70%,rgba(155,77,255,.8));
-  opacity:.45;
-  filter:blur(26px);
-  z-index:-1;
-}
-.login-brand-panel{
-  padding:44px;
-  position:relative;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  text-align:center;
-  background:
-    linear-gradient(180deg,rgba(7,22,50,.38),rgba(3,8,22,.78)),
-    radial-gradient(circle at 50% 32%,rgba(24,215,255,.16),transparent 34%);
-  border-right:1px solid rgba(120,185,255,.18);
-  overflow:hidden;
-}
-.login-brand-panel:before{
-  content:"广州进口";
-  position:absolute;
-  left:24px;
-  top:120px;
-  writing-mode:vertical-rl;
-  color:#ff54bd;
-  font-weight:900;
-  font-size:30px;
-  letter-spacing:8px;
-  text-shadow:0 0 18px rgba(255,63,180,.8);
-  opacity:.9;
-}
-.login-brand-panel:after{
-  content:"";
-  position:absolute;
-  inset:auto -20px 0 -20px;
-  height:145px;
-  background:
-    linear-gradient(180deg,transparent,rgba(2,6,17,.75)),
-    repeating-linear-gradient(90deg,rgba(24,215,255,.25) 0 2px,transparent 2px 58px);
-  opacity:.42;
-}
-.login-ship{
-  width:230px;
-  height:170px;
-  position:relative;
-  margin-bottom:18px;
-  filter:drop-shadow(0 0 25px rgba(24,215,255,.45));
-  animation:floaty 4.8s ease-in-out infinite;
-}
-.login-ship .hull{
-  position:absolute;left:20px;right:20px;bottom:30px;height:42px;
-  border:3px solid var(--cyan);border-top:none;border-radius:0 0 32px 32px;
-}
-.login-ship .hull:before{
-  content:"";position:absolute;left:-18px;top:-18px;width:55px;height:22px;
-  border-left:3px solid var(--cyan);border-bottom:3px solid var(--cyan);transform:skewX(-35deg);
-}
-.login-ship .box{
-  position:absolute;width:38px;height:32px;border:2px solid var(--cyan);bottom:72px;background:rgba(24,215,255,.08);
-}
-.login-ship .b1{left:58px}.login-ship .b2{left:98px}.login-ship .b3{left:138px}
-.login-ship .crane-line{
-  position:absolute;left:62px;top:28px;width:128px;height:3px;background:var(--cyan);box-shadow:0 0 12px var(--cyan);
-}
-.login-ship .crane-line:before{
-  content:"";position:absolute;left:18px;top:-30px;width:3px;height:66px;background:var(--cyan);
-}
-.login-ship .crane-line:after{
-  content:"";position:absolute;right:16px;top:0;width:2px;height:45px;background:var(--cyan);
-}
-.login-big-title{
-  font-size:clamp(42px,5.4vw,68px);
-  line-height:.92;
-  font-weight:950;
-  letter-spacing:7px;
-  margin:0;
-  color:white;
-  text-shadow:0 0 25px rgba(24,215,255,.65);
-}
-.login-big-title span{
-  color:#ff66d4;
-  text-shadow:0 0 28px rgba(255,63,180,.78);
-}
-.login-subtitle{
-  margin-top:16px;
-  color:var(--cyan);
-  letter-spacing:3px;
-  font-size:13px;
-  font-weight:800;
-}
-.login-features{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:10px;
-  width:100%;
-  margin-top:54px;
-  position:relative;
-  z-index:2;
-}
-.login-feature{
-  padding:14px 8px;
-  border-radius:18px;
-  background:rgba(8,20,42,.5);
-  border:1px solid rgba(120,185,255,.18);
-  color:#dbeafe;
-  font-size:12px;
-  font-weight:800;
-}
-.login-feature b{display:block;font-size:24px;margin-bottom:6px}
-.login-form-panel{
-  padding:48px;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  background:
-    linear-gradient(135deg,rgba(5,10,28,.78),rgba(14,17,49,.72)),
-    radial-gradient(circle at 85% 15%,rgba(155,77,255,.15),transparent 28%);
-}
-.login-form-panel .logo-mark{
-  justify-content:center;
-  margin-bottom:28px;
-}
-.login-form-panel .logo-icon{
-  background:linear-gradient(135deg,rgba(24,215,255,.22),rgba(255,63,180,.16));
-}
-.login-form-panel .logo-text h1{
-  font-size:34px;
-  background:linear-gradient(135deg,#18d7ff,#9b4dff,#ff3fb4);
-  -webkit-background-clip:text;
-  background-clip:text;
-  color:transparent;
-}
-.login-welcome{
-  text-align:center;
-  color:#dbeafe;
-  margin:-10px 0 24px;
-  line-height:1.6;
-}
-.login-form-panel label{
-  color:#e9f5ff;
-  font-weight:800;
-  margin-top:12px;
-}
-.login-form-panel input{
-  height:58px;
-  padding-left:48px;
-  border-radius:16px;
-  background:rgba(5,13,31,.68);
-  border-color:rgba(120,185,255,.26);
-}
-.login-input-wrap{
-  position:relative;
-}
-.login-input-wrap .login-input-icon{
-  position:absolute;
-  left:16px;
-  top:50%;
-  transform:translateY(-50%);
-  z-index:1;
-  opacity:.9;
-  font-size:20px;
-}
-.login-pass-eye{
-  position:absolute;
-  right:8px;
-  top:50%;
-  transform:translateY(-50%);
-  z-index:2;
-  width:44px;
-  height:44px;
-  border-radius:14px;
-  background:transparent;
-  color:#cbe8ff;
-  padding:0;
-}
-.login-form-panel .primary{
-  height:58px;
-  font-size:17px;
-  margin-top:22px;
-  border-radius:16px;
-  box-shadow:0 0 28px rgba(37,99,255,.3),0 0 24px rgba(255,63,180,.18);
-}
-.login-safe{
-  text-align:center;
-  margin-top:22px;
-  color:#7fdfff;
-  font-size:13px;
-}
-.login-mini-line{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:12px;
-  margin:22px 0;
-  color:#7f94b2;
-}
-.login-mini-line:before,.login-mini-line:after{
-  content:"";
-  height:1px;
-  flex:1;
-  background:linear-gradient(90deg,transparent,rgba(120,185,255,.32),transparent);
-}
-@media (max-width:820px){
-  .login{
-    padding:14px;
-    align-items:flex-start;
-  }
-  .login-card{
-    max-width:460px;
-    min-height:auto;
-    grid-template-columns:1fr;
-    border-radius:30px;
-  }
-  .login-brand-panel{
-    min-height:280px;
-    padding:28px 22px;
-    border-right:none;
-    border-bottom:1px solid rgba(120,185,255,.18);
-  }
-  .login-brand-panel:before{
-    left:16px;
-    top:52px;
-    font-size:22px;
-    letter-spacing:5px;
-  }
-  .login-ship{
-    width:170px;
-    height:120px;
-    margin-bottom:10px;
-  }
-  .login-big-title{
-    font-size:42px;
-    letter-spacing:5px;
-  }
-  .login-features{
-    margin-top:24px;
-    gap:6px;
-  }
-  .login-feature{
-    font-size:10px;
-    padding:10px 5px;
-  }
-  .login-feature b{font-size:19px}
-  .login-form-panel{
-    padding:28px 20px 24px;
-  }
-  .login-form-panel .logo-mark{
-    display:none;
-  }
-}
-
+  box-shadow:0 25px 80px rgba(31,41,51,.30);
+  animation:fadeUp .24s ease;
+}}
+.modal-head{{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}}
+.form-grid{{display:grid;grid-template-columns:1fr 1fr;gap:10px}}
+.form-grid .full{{grid-column:1/-1}}
+label{{display:block;color:var(--muted);font-size:12px;margin:8px 0 2px}}
+.modal-actions{{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}}
+.download{{background:linear-gradient(135deg,#10b981,#0ea5e9);color:white;margin-top:14px;width:100%}}
+.delete-all{{background:linear-gradient(135deg,#ef4444,#b91c1c);color:white;width:100%;margin-top:12px}}
+@media (max-width:900px){{
+  .login{{grid-template-columns:1fr;padding:12px}}
+  .login-visual{{min-height:300px;border-radius:28px;padding:22px}}
+  .login-card{{max-width:none}}
+  .container{{padding:12px}}
+  .hero{{min-height:430px;padding:20px}}
+  .hero:after{{width:180px;height:124px;right:16px;bottom:16px}}
+  .travel-card{{grid-template-columns:1fr;max-width:280px}}
+  .stat-grid{{grid-template-columns:1fr 1fr}}
+  .frais-panel{{grid-template-columns:1fr}}
+  .article-grid{{grid-template-columns:1fr 1fr}}
+  .article.compact{{grid-template-columns:auto 1fr;align-items:start}}
+  .article-actions{{grid-column:1/-1}}
+  .action-mini{{width:100%}}
+  .search-row{{grid-template-columns:1fr}}
+  .form-grid{{grid-template-columns:1fr}}
+  .photo-strip{{grid-template-columns:1fr}}
+  .tabs{{bottom:8px;left:8px;right:8px;border-radius:22px}}
+  .tabs button{{font-size:11px;min-height:54px}}
+  .logout{{bottom:86px;right:10px;padding:10px 12px;font-size:12px}}
+}}
+@media (min-width:1000px){{
+  .tabs{{left:50%;transform:translateX(-50%);max-width:760px}}
+}}
 </style>
 </head>
 
 <body>
 
 <div id="loginScreen" class="login">
+  <div class="login-visual">
+    <div>
+      <div class="tagline">
+        <span class="tag">Guangzhou</span>
+        <span class="tag">Import</span>
+        <span class="tag">Voyage</span>
+      </div>
+      <h1>KIAH<br>IMPORT</h1>
+      <p>Votre carnet de voyage pour gérer les articles, les frais et les expéditions.</p>
+    </div>
+  </div>
+
   <div class="login-card">
-    <div class="login-brand-panel">
-      <div class="login-ship">
-        <div class="crane-line"></div>
-        <div class="box b1"></div>
-        <div class="box b2"></div>
-        <div class="box b3"></div>
-        <div class="hull"></div>
-      </div>
-      <h1 class="login-big-title">KIAH<br><span>IMPORT</span></h1>
-      <div class="login-subtitle">GUANGZHOU IMPORT SYSTEM</div>
-      <div class="login-features">
-        <div class="login-feature"><b>📦</b>Importation rapide</div>
-        <div class="login-feature"><b>🛡️</b>Sécurisé & fiable</div>
-        <div class="login-feature"><b>🚚</b>Gestion complète</div>
+    <div class="logo-mark">
+      <div class="logo-icon">✈️</div>
+      <div class="logo-text">
+        <h1>KIAH Import</h1>
+        <small>TRAVEL EDITION</small>
       </div>
     </div>
-
-    <div class="login-form-panel">
-      <div class="logo-mark">
-        <div class="logo-icon">🚢</div>
-        <div class="logo-text">
-          <h1>KIAH Import</h1>
-          <small>GUANGZHOU SYSTEM</small>
-        </div>
-      </div>
-
-      <div class="login-welcome">
-        Connectez-vous pour accéder à votre espace<br>
-        de gestion d’importation.
-      </div>
-
-      <label>Email</label>
-      <div class="login-input-wrap">
-        <span class="login-input-icon">✉️</span>
-        <input id="emailInput" type="email" placeholder="Entrez votre email">
-      </div>
-
-      <label>Mot de passe</label>
-      <div class="login-input-wrap">
-        <span class="login-input-icon">🔒</span>
-        <input id="passwordInput" type="password" placeholder="Entrez votre mot de passe">
-        <button class="login-pass-eye" onclick="togglePassword()" type="button">👁️</button>
-      </div>
-
-      <button class="primary" onclick="login()">Connexion →</button>
-      <div id="errorBox" class="error"></div>
-
-      <div class="login-mini-line">ou</div>
-      <div class="login-safe">🔐 Vos données sont sécurisées avec Firebase</div>
-    </div>
+    <input id="emailInput" type="email" placeholder="Email">
+    <input id="passwordInput" type="password" placeholder="Mot de passe">
+    <button class="primary" onclick="login()">Se connecter</button>
+    <div id="errorBox" class="error"></div>
   </div>
 </div>
 
@@ -843,7 +567,7 @@ label{display:block;color:var(--muted);font-size:12px;margin:8px 0 2px}
     <div class="top-row">
       <button class="user-btn" onclick="changeUser()">👤 Changer utilisateur</button>
       <div style="text-align:right">
-        <h1>🚢 KIAH Import</h1>
+        <h1>✈️ KIAH Import</h1>
         <small id="currentUserLabel">Utilisateur</small>
       </div>
     </div>
@@ -853,14 +577,20 @@ label{display:block;color:var(--muted);font-size:12px;margin:8px 0 2px}
 
     <div id="home" class="section active">
       <div class="card hero">
-        <h2>Bonjour, Kiah 👋</h2>
-        <p>Vue claire de vos articles, frais et expéditions.</p>
-        <div class="neon-cn">广州进口</div>
-        <div class="skyline">
-          <div class="building"></div><div class="building"></div><div class="building"></div>
-          <div class="tower"></div>
-          <div class="building"></div><div class="building"></div><div class="building"></div>
-          <div class="crane"></div>
+        <div>
+          <h2>Bonjour, Kiah 👋</h2>
+          <p>Import • Voyage • Guangzhou • Expédition</p>
+          <div class="tagline">
+            <span class="tag">📦 Articles</span>
+            <span class="tag">🚢 SEA</span>
+            <span class="tag">✈️ AIR</span>
+            <span class="tag">🧾 Frais</span>
+          </div>
+        </div>
+        <div class="travel-card">
+          <div>📦 Importation rapide</div>
+          <div>🛡️ Suivi fiable</div>
+          <div>🌍 Gestion complète</div>
         </div>
       </div>
 
@@ -872,6 +602,11 @@ label{display:block;color:var(--muted);font-size:12px;margin:8px 0 2px}
           <button class="secondary" onclick="openTabById('articles')">Voir articles</button>
         </div>
         <div class="article-grid" id="homeTypeGrid"></div>
+      </div>
+
+      <div class="photo-strip">
+        <div class="photo-box">Souvenirs Guangzhou • Business & Famille</div>
+        <div class="photo-box small">Travel Import</div>
       </div>
     </div>
 
@@ -897,7 +632,7 @@ label{display:block;color:var(--muted);font-size:12px;margin:8px 0 2px}
         <div class="card-title-row">
           <div>
             <h2>Articles</h2>
-            <div class="count">Gestion compacte pour éviter les listes trop chargées</div>
+            <div class="count">Vue compacte pour gérer beaucoup d’articles facilement</div>
           </div>
           <button class="primary" style="width:auto" onclick="openAddArticle()">+ Ajouter</button>
         </div>
@@ -947,7 +682,7 @@ label{display:block;color:var(--muted);font-size:12px;margin:8px 0 2px}
 
   <div class="tabs">
     <button class="active" data-tab="home" onclick="openTab('home',this)"><span class="ico">🏠</span>Accueil</button>
-    <button data-tab="frais" onclick="openTab('frais',this)"><span class="ico">🧮</span>Frais</button>
+    <button data-tab="frais" onclick="openTab('frais',this)"><span class="ico">🧾</span>Frais</button>
     <button data-tab="articles" onclick="openTab('articles',this)"><span class="ico">📦</span>Articles</button>
     <button data-tab="expeditions" onclick="openTab('expeditions',this)"><span class="ico">🚚</span>Expéditions</button>
   </div>
@@ -1020,11 +755,11 @@ label{display:block;color:var(--muted);font-size:12px;margin:8px 0 2px}
 </div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
-import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-database.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js";
+import {{ initializeApp }} from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+import {{ getDatabase, ref, push, onValue, remove, update }} from "https://www.gstatic.com/firebasejs/12.12.1/firebase-database.js";
+import {{ getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut }} from "https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js";
 
-const firebaseConfig = {
+const firebaseConfig = {{
   apiKey: "AIzaSyATZL0nUdSchECCaBhgr77qn2ZeFqAkKOs",
   authDomain: "kiah-import.firebaseapp.com",
   databaseURL: "https://kiah-import-default-rtdb.europe-west1.firebasedatabase.app",
@@ -1032,7 +767,7 @@ const firebaseConfig = {
   storageBucket: "kiah-import.firebasestorage.app",
   messagingSenderId: "722760438358",
   appId: "1:722760438358:web:aba00bedd603b568be61f7"
-};
+}};
 
 const appFirebase = initializeApp(firebaseConfig);
 const db = getDatabase(appFirebase);
@@ -1040,13 +775,13 @@ const auth = getAuth(appFirebase);
 
 const MODES = ["SEA","AIR","EXP","AIR BATT","AUTRE"];
 const WEIGHT_MODES = ["AIR","EXP","AIR BATT"];
-const MODE_INFO = {
-  "SEA": {icon:"🚢", cls:"cyan"},
-  "AIR": {icon:"✈️", cls:"violet"},
-  "EXP": {icon:"🚀", cls:"orange"},
-  "AIR BATT": {icon:"🔋", cls:"red"},
-  "AUTRE": {icon:"📦", cls:""}
-};
+const MODE_INFO = {{
+  "SEA": {{icon:"🚢", cls:"cyan"}},
+  "AIR": {{icon:"✈️", cls:"violet"}},
+  "EXP": {{icon:"🚀", cls:"orange"}},
+  "AIR BATT": {{icon:"🔋", cls:"red"}},
+  "AUTRE": {{icon:"📦", cls:""}}
+}};
 
 let currentUserKey = "";
 let currentUserEmail = "";
@@ -1054,254 +789,190 @@ let selectedUserKey = "GLOBAL";
 let selectedMode = "TOUS";
 let selectedExpMode = "";
 let selectedExpDate = "";
-let allUsers = {};
-let allArticles = {};
+let allUsers = {{}};
+let allArticles = {{}};
 let listenersStarted = false;
 let fraisType = "SEA";
 let editingArticleId = null;
 let showArchives = false;
 
-function safeKey(email){
-  return email.replaceAll(".", "_").replaceAll("@", "_");
-}
-
-function formatAr(value){
-  return Math.round(value || 0).toLocaleString("fr-FR") + " Ar";
-}
-
-function getSeaPricePerCbm(){
+function safeKey(email){{ return email.replaceAll(".", "_").replaceAll("@", "_"); }}
+function formatAr(value){{ return Math.round(value || 0).toLocaleString("fr-FR") + " Ar"; }}
+function getSeaPricePerCbm(){{
   let prix = parseFloat(localStorage.getItem("kiah_prixCBM") || "360")||0;
   let usd = parseFloat(localStorage.getItem("kiah_usd") || "4750")||0;
   return prix * usd;
-}
-
-function getKgPrice(mode){
+}}
+function getKgPrice(mode){{
   if(mode === "EXP") return parseFloat(localStorage.getItem("kiah_prixKgExp") || "80000")||0;
   if(mode === "AIR BATT") return parseFloat(localStorage.getItem("kiah_prixKgAirBatt") || "120000")||0;
   return parseFloat(localStorage.getItem("kiah_prixKg") || "69000")||0;
-}
-
-function modeBadge(mode){
+}}
+function modeBadge(mode){{
   let cls = "";
   if(mode === "AIR") cls="air";
   if(mode === "EXP") cls="exp";
   if(mode === "AIR BATT") cls="batt";
   if(mode === "AUTRE") cls="autre";
-  return `<span class="badge ${cls}">${mode || ""}</span>`;
-}
+  return `<span class="badge ${{cls}}">${{mode || ""}}</span>`;
+}}
 
-
-window.togglePassword = function(){
-  const input = document.getElementById("passwordInput");
-  input.type = input.type === "password" ? "text" : "password";
-}
-
-window.login = function(){
+window.login = function(){{
   const email = document.getElementById("emailInput").value.trim();
   const pass = document.getElementById("passwordInput").value;
   document.getElementById("errorBox").innerText = "";
-
-  signInWithEmailAndPassword(auth,email,pass)
-  .catch((error)=>{
+  signInWithEmailAndPassword(auth,email,pass).catch((error)=>{{
     document.getElementById("errorBox").innerText = error.message;
-  });
-}
+  }});
+}}
+window.logout = function(){{ signOut(auth); }}
 
-window.logout = function(){ 
-  signOut(auth); 
-}
-
-onAuthStateChanged(auth, async (user)=>{
-  if(user){
+onAuthStateChanged(auth, async (user)=>{{
+  if(user){{
     currentUserEmail = user.email;
     currentUserKey = safeKey(user.email);
     selectedUserKey = currentUserKey;
-
-    await update(ref(db,"users/"+currentUserKey), {
-      email:user.email
-    });
-
+    await update(ref(db,"users/"+currentUserKey), {{ email:user.email }});
     document.getElementById("loginScreen").style.display="none";
     document.getElementById("app").style.display="block";
     document.getElementById("currentUserLabel").innerText = user.email;
-
-    if(!listenersStarted){
+    if(!listenersStarted){{
       listenersStarted = true;
       listenUsers();
       listenArticles();
-    }
+    }}
     renderFraisInputs();
-  }else{
+  }}else{{
     document.getElementById("app").style.display="none";
-    document.getElementById("loginScreen").style.display="flex";
-  }
-});
+    document.getElementById("loginScreen").style.display="grid";
+  }}
+}});
 
-function listenUsers(){
-  onValue(ref(db,"users"), snap=>{
-    allUsers = snap.val() || {};
-  });
-}
+function listenUsers(){{ onValue(ref(db,"users"), snap=>{{ allUsers = snap.val() || {{}}; }}); }}
+function listenArticles(){{ onValue(ref(db,"articles"), snap=>{{ allArticles = snap.val() || {{}}; renderAll(); }}); }}
 
-function listenArticles(){
-  onValue(ref(db,"articles"), snap=>{
-    allArticles = snap.val() || {};
-    renderAll();
-  });
-}
-
-function renderAll(){
+function renderAll(){{
   renderHome();
   renderModeButtons();
   renderArticleCategoryCards();
   renderArticles();
   renderExpeditionModeButtons();
   renderExpeditions();
-}
+}}
 
-window.changeUser = function(){
+window.changeUser = function(){{
   let keys = ["GLOBAL"];
   let labels = ["GLOBAL"];
-
-  Object.keys(allUsers).forEach(k=>{
-    keys.push(k);
-    labels.push(allUsers[k].email);
-  });
-
-  let message = "Choisir utilisateur :\n";
-  labels.forEach((label,i)=> message += `${i+1}. ${label}\n`);
-
+  Object.keys(allUsers).forEach(k=>{{ keys.push(k); labels.push(allUsers[k].email); }});
+  let message = "Choisir utilisateur :\\n";
+  labels.forEach((label,i)=> message += `${{i+1}}. ${{label}}\\n`);
   let num = prompt(message);
   let index = parseInt(num) - 1;
-
   if(isNaN(index) || !keys[index]) return;
-
   selectedUserKey = keys[index];
   document.getElementById("currentUserLabel").innerText = labels[index];
-
   selectedMode = "TOUS";
   selectedExpMode = "";
   selectedExpDate = "";
-
   renderAll();
-}
+}}
 
-function getVisibleArticles(){
+function getVisibleArticles(){{
   let result = [];
-
-  Object.keys(allArticles).forEach(id=>{
-    let item = {...allArticles[id]};
+  Object.keys(allArticles).forEach(id=>{{
+    let item = {{...allArticles[id]}};
     item.id = id;
-
-    if(selectedUserKey === "GLOBAL" || item.userKey === selectedUserKey){
-      result.push(item);
-    }
-  });
-
+    if(selectedUserKey === "GLOBAL" || item.userKey === selectedUserKey) result.push(item);
+  }});
   result.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
   return result;
-}
-
-function activeArticles(){
-  return getVisibleArticles().filter(a => showArchives ? a.archived : !a.archived);
-}
+}}
+function activeArticles(){{ return getVisibleArticles().filter(a => showArchives ? a.archived : !a.archived); }}
 
 /* HOME */
-function renderHome(){
+function renderHome(){{
   let articles = getVisibleArticles();
   let active = articles.filter(a=>!a.archived);
   let shipped = active.filter(a=>(a.expedie||"").trim());
   let waiting = active.length - shipped.length;
-
   let estimated = 0;
-  active.forEach(a=>{
+  active.forEach(a=>{{
     if(a.mode === "SEA") estimated += (parseFloat(a.expCbm)||0) * getSeaPricePerCbm();
     if(WEIGHT_MODES.includes(a.mode)) estimated += (parseFloat(a.expKg)||0) * getKgPrice(a.mode);
-  });
-
+  }});
   document.getElementById("homeStats").innerHTML = `
-    <div class="stat-card cyan"><span>Total articles</span><strong>${active.length}</strong><small>Actifs</small></div>
-    <div class="stat-card violet"><span>Expédiés</span><strong>${shipped.length}</strong><small>Avec date expédition</small></div>
-    <div class="stat-card orange"><span>En attente</span><strong>${waiting}</strong><small>Pas encore expédiés</small></div>
-    <div class="stat-card green"><span>Montant estimé</span><strong style="font-size:22px">${formatAr(estimated)}</strong><small>Selon CBM/Kg saisis</small></div>
+    <div class="stat-card cyan"><span>Total articles</span><strong>${{active.length}}</strong><small>Actifs</small></div>
+    <div class="stat-card violet"><span>Expédiés</span><strong>${{shipped.length}}</strong><small>Avec date expédition</small></div>
+    <div class="stat-card orange"><span>En attente</span><strong>${{waiting}}</strong><small>Pas encore expédiés</small></div>
+    <div class="stat-card green"><span>Montant estimé</span><strong style="font-size:22px">${{formatAr(estimated)}}</strong><small>Selon CBM/Kg saisis</small></div>
   `;
-
   let box = document.getElementById("homeTypeGrid");
   box.innerHTML = "";
-  MODES.forEach(mode=>{
+  MODES.forEach(mode=>{{
     let list = active.filter(a=>a.mode===mode);
     let shippedCount = list.filter(a=>(a.expedie||"").trim()).length;
     let cls = MODE_INFO[mode].cls;
     box.innerHTML += `
-      <div class="category-card ${cls}" onclick="openArticlesMode('${mode}')">
-        <div style="font-size:28px">${MODE_INFO[mode].icon}</div>
-        <b>${mode}</b>
-        <div class="big">${list.length}</div>
-        <div class="count">${shippedCount} expédiés • ${list.length-shippedCount} attente</div>
+      <div class="category-card ${{cls}}" onclick="openArticlesMode('${{mode}}')">
+        <div style="font-size:28px">${{MODE_INFO[mode].icon}}</div>
+        <b>${{mode}}</b>
+        <div class="big">${{list.length}}</div>
+        <div class="count">${{shippedCount}} expédiés • ${{list.length-shippedCount}} attente</div>
       </div>
     `;
-  });
-}
+  }});
+}}
 
 /* FRAIS */
-window.selectFraisType = function(type){
-  fraisType = type;
-  renderFraisInputs();
-}
+window.selectFraisType = function(type){{ fraisType = type; renderFraisInputs(); }}
+function setLocal(id,val){{ localStorage.setItem(id,val); }}
+window.setLocal = setLocal;
 
-function setLocal(id,val){ localStorage.setItem(id,val); }
-
-function renderFraisInputs(){
-  ["SEA","AIR","EXP","AIR BATT"].forEach(t=>{
+function renderFraisInputs(){{
+  ["SEA","AIR","EXP","AIR BATT"].forEach(t=>{{
     let el = document.getElementById("type"+t);
     if(el) el.classList.toggle("active", fraisType===t);
-  });
-
+  }});
   let box = document.getElementById("fraisInputs");
   if(!box) return;
-
-  if(fraisType === "SEA"){
+  if(fraisType === "SEA"){{
     box.innerHTML = `
       <h2>Calcul SEA</h2>
       <label>CBM</label>
       <input id="cbm" type="number" placeholder="CBM" oninput="calcSea()">
       <label>Prix CBM en dollar</label>
-      <input id="prixCBM" type="number" value="${localStorage.getItem("kiah_prixCBM") || "360"}" oninput="setLocal('kiah_prixCBM',this.value); calcSea(); renderAll();">
+      <input id="prixCBM" type="number" value="${{localStorage.getItem("kiah_prixCBM") || "360"}}" oninput="setLocal('kiah_prixCBM',this.value); calcSea(); renderAll();">
       <label>Dollar en Ariary</label>
-      <input id="usd" type="number" value="${localStorage.getItem("kiah_usd") || "4750"}" oninput="setLocal('kiah_usd',this.value); calcSea(); renderAll();">
+      <input id="usd" type="number" value="${{localStorage.getItem("kiah_usd") || "4750"}}" oninput="setLocal('kiah_usd',this.value); calcSea(); renderAll();">
       <div class="result" id="resultSea">0 Ar</div>
     `;
-  }else{
+  }}else{{
     let key = fraisType === "AIR" ? "kiah_prixKg" : fraisType === "EXP" ? "kiah_prixKgExp" : "kiah_prixKgAirBatt";
     let def = fraisType === "AIR" ? "69000" : fraisType === "EXP" ? "80000" : "120000";
     box.innerHTML = `
-      <h2>Calcul ${fraisType}</h2>
+      <h2>Calcul ${{fraisType}}</h2>
       <label>Poids Kg</label>
       <input id="kgCalc" type="number" placeholder="Poids Kg" oninput="calcKgMode()">
-      <label>Prix Kg ${fraisType}</label>
-      <input id="prixKgCalc" type="number" value="${localStorage.getItem(key) || def}" oninput="setLocal('${key}',this.value); calcKgMode(); renderAll();">
+      <label>Prix Kg ${{fraisType}}</label>
+      <input id="prixKgCalc" type="number" value="${{localStorage.getItem(key) || def}}" oninput="setLocal('${{key}}',this.value); calcKgMode(); renderAll();">
       <div class="result" id="resultKgCalc">0 Ar</div>
     `;
-  }
-}
-
-window.setLocal = setLocal;
-
-window.calcSea = function(){
+  }}
+}}
+window.calcSea = function(){{
   let cbm = parseFloat(document.getElementById("cbm")?.value)||0;
   let prix = parseFloat(document.getElementById("prixCBM")?.value)||0;
   let usd = parseFloat(document.getElementById("usd")?.value)||0;
   document.getElementById("resultSea").innerText = formatAr(cbm*prix*usd);
-}
-
-window.calcKgMode = function(){
+}}
+window.calcKgMode = function(){{
   let kg = parseFloat(document.getElementById("kgCalc")?.value)||0;
   let prix = parseFloat(document.getElementById("prixKgCalc")?.value)||0;
   document.getElementById("resultKgCalc").innerText = formatAr(kg*prix);
-}
+}}
 
 /* ARTICLES */
-window.openAddArticle = function(){
+window.openAddArticle = function(){{
   editingArticleId = null;
   document.getElementById("modalTitle").innerText = "Ajouter un article";
   document.getElementById("modalRef").value = "";
@@ -1317,12 +988,10 @@ window.openAddArticle = function(){
   document.getElementById("modalDeleteBtn").style.display = "none";
   adjustModalFields();
   document.getElementById("articleModal").classList.add("show");
-}
-
-window.openEditArticle = function(id){
+}}
+window.openEditArticle = function(id){{
   let item = allArticles[id];
   if(!item) return;
-
   editingArticleId = id;
   document.getElementById("modalTitle").innerText = "Voir / Modifier";
   document.getElementById("modalRef").value = item.ref || "";
@@ -1338,25 +1007,18 @@ window.openEditArticle = function(id){
   document.getElementById("modalDeleteBtn").style.display = "block";
   adjustModalFields();
   document.getElementById("articleModal").classList.add("show");
-}
-
-window.closeArticleModal = function(){
-  document.getElementById("articleModal").classList.remove("show");
-}
-
+}}
+window.closeArticleModal = function(){{ document.getElementById("articleModal").classList.remove("show"); }}
 document.getElementById("modalMode").addEventListener("change", adjustModalFields);
-
-function adjustModalFields(){
+function adjustModalFields(){{
   let mode = document.getElementById("modalMode").value;
   document.getElementById("modalCbmBox").style.display = mode==="SEA" ? "block" : "none";
   document.getElementById("modalKgBox").style.display = WEIGHT_MODES.includes(mode) ? "block" : "none";
-}
-
-window.saveArticleModal = function(){
+}}
+window.saveArticleModal = function(){{
   let refVal = document.getElementById("modalRef").value.trim();
-  if(!refVal){ alert("Référence obligatoire"); return; }
-
-  let data = {
+  if(!refVal){{ alert("Référence obligatoire"); return; }}
+  let data = {{
     ref: refVal,
     name: document.getElementById("modalName").value.trim(),
     mode: document.getElementById("modalMode").value,
@@ -1367,102 +1029,63 @@ window.saveArticleModal = function(){
     expKg: document.getElementById("modalKg").value,
     note: document.getElementById("modalNote").value.trim(),
     archived: document.getElementById("modalArchived").value === "archived"
-  };
-
-  if(editingArticleId){
-    update(ref(db,`articles/${editingArticleId}`), data);
-  }else{
-    push(ref(db,"articles"),{
-      ...data,
-      userKey: currentUserKey,
-      createdBy: currentUserEmail,
-      createdAt: Date.now()
-    });
+  }};
+  if(editingArticleId){{
+    update(ref(db,`articles/${{editingArticleId}}`), data);
+  }}else{{
+    push(ref(db,"articles"),{{ ...data, userKey: currentUserKey, createdBy: currentUserEmail, createdAt: Date.now() }});
     selectedMode = data.mode;
-  }
+  }}
   closeArticleModal();
-}
-
-window.deleteArticleFromModal = function(){
+}}
+window.deleteArticleFromModal = function(){{
   if(!editingArticleId) return;
-  if(confirm("Supprimer cet article définitivement ?")){
-    remove(ref(db,`articles/${editingArticleId}`));
+  if(confirm("Supprimer cet article définitivement ?")){{
+    remove(ref(db,`articles/${{editingArticleId}}`));
     closeArticleModal();
-  }
-}
-
-function renderArticleCategoryCards(){
+  }}
+}}
+function renderArticleCategoryCards(){{
   let articles = activeArticles();
   let box = document.getElementById("articleCategoryCards");
   if(!box) return;
   box.innerHTML = "";
-
-  let allCount = articles.length;
   box.innerHTML += `
-    <div class="category-card ${selectedMode==="TOUS"?'active':''}" onclick="selectMode('TOUS')">
-      <div style="font-size:28px">🧭</div><b>TOUS</b><div class="big">${allCount}</div><div class="count">${showArchives?'Archives':'Actifs'}</div>
-    </div>
-  `;
-
-  MODES.forEach(mode=>{
+    <div class="category-card ${{selectedMode==="TOUS"?'active':''}}" onclick="selectMode('TOUS')">
+      <div style="font-size:28px">🧭</div><b>TOUS</b><div class="big">${{articles.length}}</div><div class="count">${{showArchives?'Archives':'Actifs'}}</div>
+    </div>`;
+  MODES.forEach(mode=>{{
     let count = articles.filter(a=>a.mode===mode).length;
     let cls = MODE_INFO[mode].cls;
     box.innerHTML += `
-      <div class="category-card ${cls} ${selectedMode===mode?'active':''}" onclick="selectMode('${mode}')">
-        <div style="font-size:28px">${MODE_INFO[mode].icon}</div><b>${mode}</b><div class="big">${count}</div><div class="count">article(s)</div>
-      </div>
-    `;
-  });
-}
-
-function renderModeButtons(){
+      <div class="category-card ${{cls}} ${{selectedMode===mode?'active':''}}" onclick="selectMode('${{mode}}')">
+        <div style="font-size:28px">${{MODE_INFO[mode].icon}}</div><b>${{mode}}</b><div class="big">${{count}}</div><div class="count">article(s)</div>
+      </div>`;
+  }});
+}}
+function renderModeButtons(){{
   let articles = activeArticles();
-  let counts = {};
+  let counts = {{}};
   articles.forEach(a=> counts[a.mode] = (counts[a.mode] || 0) + 1);
-
   let box = document.getElementById("modeButtons");
   if(!box) return;
-  box.innerHTML = `<button class="chip ${selectedMode==="TOUS"?'active':''}" onclick="selectMode('TOUS')">Tous (${articles.length})</button>`;
-
-  MODES.forEach(mode=>{
-    box.innerHTML += `<button class="chip ${selectedMode===mode?'active':''}" onclick="selectMode('${mode}')">${mode} (${counts[mode]||0})</button>`;
-  });
-}
-
-window.selectMode = function(mode){
-  selectedMode = mode;
-  renderModeButtons();
-  renderArticleCategoryCards();
-  renderArticles();
-}
-
-window.openArticlesMode = function(mode){
-  selectedMode = mode;
-  showArchives = false;
-  openTabById("articles");
-}
-
-window.toggleArchiveView = function(){
+  box.innerHTML = `<button class="chip ${{selectedMode==="TOUS"?'active':''}}" onclick="selectMode('TOUS')">Tous (${{articles.length}})</button>`;
+  MODES.forEach(mode=>{{ box.innerHTML += `<button class="chip ${{selectedMode===mode?'active':''}}" onclick="selectMode('${{mode}}')">${{mode}} (${{counts[mode]||0}})</button>`; }});
+}}
+window.selectMode = function(mode){{ selectedMode = mode; renderModeButtons(); renderArticleCategoryCards(); renderArticles(); }}
+window.openArticlesMode = function(mode){{ selectedMode = mode; showArchives = false; openTabById("articles"); }}
+window.toggleArchiveView = function(){{
   showArchives = !showArchives;
   document.getElementById("archiveToggle").innerText = showArchives ? "Articles actifs" : "Archives";
   selectedMode = "TOUS";
   renderAll();
-}
-
-window.clearSearch = function(){
-  document.getElementById("searchInput").value = "";
-  renderArticles();
-}
-
-window.renderArticles = function(){
+}}
+window.clearSearch = function(){{ document.getElementById("searchInput").value = ""; renderArticles(); }}
+window.renderArticles = function(){{
   let search = (document.getElementById("searchInput")?.value || "").toLowerCase().trim();
   let articles = activeArticles();
-
-  if(selectedMode && selectedMode !== "TOUS"){
-    articles = articles.filter(a=>a.mode === selectedMode);
-  }
-
-  if(search){
+  if(selectedMode && selectedMode !== "TOUS") articles = articles.filter(a=>a.mode === selectedMode);
+  if(search){{
     articles = articles.filter(a=>
       (a.ref || "").toLowerCase().includes(search) ||
       (a.name || "").toLowerCase().includes(search) ||
@@ -1471,291 +1094,180 @@ window.renderArticles = function(){
       (a.depot || "").toLowerCase().includes(search) ||
       (a.expedie || "").toLowerCase().includes(search)
     );
-  }
-
-  document.getElementById("listTitle").innerText = `${showArchives ? "Archives" : "Articles actifs"} ${selectedMode !== "TOUS" ? "- " + selectedMode : ""}`;
-  document.getElementById("categoryTotal").innerText = `Total affiché : ${articles.length} article(s)`;
-
+  }}
+  document.getElementById("listTitle").innerText = `${{showArchives ? "Archives" : "Articles actifs"}} ${{selectedMode !== "TOUS" ? "- " + selectedMode : ""}}`;
+  document.getElementById("categoryTotal").innerText = `Total affiché : ${{articles.length}} article(s)`;
   let box = document.getElementById("items");
   box.innerHTML = "";
-
-  if(!articles.length){
-    box.innerHTML = `<div class="empty">Aucun article trouvé</div>`;
-    return;
-  }
-
-  articles.forEach(item=>{
+  if(!articles.length){{ box.innerHTML = `<div class="empty">Aucun article trouvé</div>`; return; }}
+  articles.forEach(item=>{{
     let mode = item.mode || "AUTRE";
     let icon = MODE_INFO[mode]?.icon || "📦";
     let shipped = (item.expedie || "").trim();
     let valueText = "";
-    if(mode === "SEA"){
+    if(mode === "SEA"){{
       let price = (parseFloat(item.expCbm)||0) * getSeaPricePerCbm();
-      if(item.expCbm) valueText = `${item.expCbm} CBM • ${formatAr(price)}`;
-    }else if(WEIGHT_MODES.includes(mode)){
+      if(item.expCbm) valueText = `${{item.expCbm}} CBM • ${{formatAr(price)}}`;
+    }}else if(WEIGHT_MODES.includes(mode)){{
       let price = (parseFloat(item.expKg)||0) * getKgPrice(mode);
-      if(item.expKg) valueText = `${item.expKg} Kg • ${formatAr(price)}`;
-    }
-
+      if(item.expKg) valueText = `${{item.expKg}} Kg • ${{formatAr(price)}}`;
+    }}
     box.innerHTML += `
       <div class="article compact">
-        <div class="article-icon">${icon}</div>
+        <div class="article-icon">${{icon}}</div>
         <div>
-          <div class="article-ref">${item.ref || ""}</div>
-          <div class="article-name">${item.name || ""}</div>
+          <div class="article-ref">${{item.ref || ""}}</div>
+          <div class="article-name">${{item.name || ""}}</div>
           <div class="article-meta">
-            ${modeBadge(mode)}
-            <span class="badge ${shipped?'':'exp'}">${shipped ? "Expédié : "+shipped : "En attente"}</span>
-            ${item.achat ? `<span class="badge autre">Achat : ${item.achat}</span>` : ""}
-            ${valueText ? `<span class="badge">${valueText}</span>` : ""}
+            ${{modeBadge(mode)}}
+            <span class="badge ${{shipped?'':'exp'}}">${{shipped ? "Expédié : "+shipped : "En attente"}}</span>
+            ${{item.achat ? `<span class="badge autre">Achat : ${{item.achat}}</span>` : ""}}
+            ${{valueText ? `<span class="badge">${{valueText}}</span>` : ""}}
           </div>
-          <div class="count">${item.createdBy || ""}${item.note ? " • Note disponible" : ""}</div>
+          <div class="count">${{item.createdBy || ""}}${{item.note ? " • Note disponible" : ""}}</div>
         </div>
         <div class="article-actions">
-          <button class="action-mini" onclick="openEditArticle('${item.id}')">Voir / Modifier ›</button>
+          <button class="action-mini" onclick="openEditArticle('${{item.id}}')">Voir / Modifier ›</button>
         </div>
-      </div>
-    `;
-  });
-}
+      </div>`;
+  }});
+}}
 
 /* EXPEDITIONS */
-function getShippedArticles(){
-  return getVisibleArticles().filter(a => !a.archived && (a.expedie || "").trim() !== "");
-}
-
-function renderExpeditionModeButtons(){
+function getShippedArticles(){{ return getVisibleArticles().filter(a => !a.archived && (a.expedie || "").trim() !== ""); }}
+function renderExpeditionModeButtons(){{
   let articles = getShippedArticles();
-  let counts = {};
-
-  articles.forEach(a=>{
-    counts[a.mode] = (counts[a.mode] || 0) + 1;
-  });
-
+  let counts = {{}};
+  articles.forEach(a=>{{ counts[a.mode] = (counts[a.mode] || 0) + 1; }});
   let box = document.getElementById("expModeButtons");
   if(!box) return;
   box.innerHTML = "";
-
-  MODES.forEach(mode=>{
-    if(counts[mode]){
+  MODES.forEach(mode=>{{
+    if(counts[mode]){{
       if(!selectedExpMode) selectedExpMode = mode;
-      box.innerHTML += `<button class="${selectedExpMode===mode?'active':''}" onclick="selectExpMode('${mode}')">${MODE_INFO[mode].icon} ${mode} (${counts[mode]})</button>`;
-    }
-  });
-
-  if(selectedExpMode && !counts[selectedExpMode]){
-    selectedExpMode = Object.keys(counts)[0] || "";
-    selectedExpDate = "";
-  }
-}
-
-window.selectExpMode = function(mode){
-  selectedExpMode = mode;
-  selectedExpDate = "";
-  renderExpeditionModeButtons();
-  renderExpeditions();
-}
-
-function renderExpeditions(){
+      box.innerHTML += `<button class="${{selectedExpMode===mode?'active':''}}" onclick="selectExpMode('${{mode}}')">${{MODE_INFO[mode].icon}} ${{mode}} (${{counts[mode]}})</button>`;
+    }}
+  }});
+  if(selectedExpMode && !counts[selectedExpMode]){{ selectedExpMode = Object.keys(counts)[0] || ""; selectedExpDate = ""; }}
+}}
+window.selectExpMode = function(mode){{ selectedExpMode = mode; selectedExpDate = ""; renderExpeditionModeButtons(); renderExpeditions(); }}
+function renderExpeditions(){{
   let articles = getShippedArticles();
-
-  if(selectedExpMode){
-    articles = articles.filter(a=>a.mode === selectedExpMode);
-  }
-
-  let dateCounts = {};
-  articles.forEach(a=>{
-    let d = (a.expedie || "").trim();
-    dateCounts[d] = (dateCounts[d] || 0) + 1;
-  });
-
+  if(selectedExpMode) articles = articles.filter(a=>a.mode === selectedExpMode);
+  let dateCounts = {{}};
+  articles.forEach(a=>{{ let d = (a.expedie || "").trim(); dateCounts[d] = (dateCounts[d] || 0) + 1; }});
   let dateBox = document.getElementById("expDateButtons");
   if(!dateBox) return;
   dateBox.innerHTML = "";
-
   let dates = Object.keys(dateCounts).sort().reverse();
-
-  if(selectedExpDate && !dateCounts[selectedExpDate]){
-    selectedExpDate = "";
-  }
-
-  if(!selectedExpDate && dates.length){
-    selectedExpDate = dates[0];
-  }
-
-  dates.forEach(date=>{
-    dateBox.innerHTML += `<button class="${selectedExpDate===date?'active':''}" onclick="selectExpDate('${date}')">${date} (${dateCounts[date]})</button>`;
-  });
-
-  if(selectedExpDate){
-    articles = articles.filter(a=>(a.expedie || "").trim() === selectedExpDate);
-  }
-
-  document.getElementById("expTitle").innerText = selectedExpMode && selectedExpDate ? `Expéditions ${selectedExpMode} - ${selectedExpDate}` : "Liste expédiée";
-  document.getElementById("expTotal").innerText = selectedExpMode && selectedExpDate ? `Total : ${articles.length} article(s)` : "";
-
+  if(selectedExpDate && !dateCounts[selectedExpDate]) selectedExpDate = "";
+  if(!selectedExpDate && dates.length) selectedExpDate = dates[0];
+  dates.forEach(date=>{{ dateBox.innerHTML += `<button class="${{selectedExpDate===date?'active':''}}" onclick="selectExpDate('${{date}}')">${{date}} (${{dateCounts[date]}})</button>`; }});
+  if(selectedExpDate) articles = articles.filter(a=>(a.expedie || "").trim() === selectedExpDate);
+  document.getElementById("expTitle").innerText = selectedExpMode && selectedExpDate ? `Expéditions ${{selectedExpMode}} - ${{selectedExpDate}}` : "Liste expédiée";
+  document.getElementById("expTotal").innerText = selectedExpMode && selectedExpDate ? `Total : ${{articles.length}} article(s)` : "";
   let box = document.getElementById("expItems");
   let summary = document.getElementById("expSummary");
   box.innerHTML = "";
   summary.innerHTML = "";
-
-  if(!articles.length){
+  if(!articles.length){{
     box.innerHTML = `<div class="empty">Aucune expédition disponible</div>`;
     document.getElementById("deleteAllExpBtn").style.display = "none";
     document.getElementById("downloadExpBtn").style.display = "none";
     return;
-  }
-
-  let totalCbm = 0;
-  let totalKg = 0;
-  let totalPrice = 0;
-
-  articles.forEach(item=>{
+  }}
+  let totalCbm = 0, totalKg = 0, totalPrice = 0;
+  articles.forEach(item=>{{
     let mode = item.mode || "";
-    let value = 0;
-    let price = 0;
-    let inputHtml = "";
-    let resultHtml = "";
-
-    if(mode === "SEA"){
+    let value = 0, price = 0, inputHtml = "", resultHtml = "";
+    if(mode === "SEA"){{
       value = parseFloat(item.expCbm) || 0;
       price = value * getSeaPricePerCbm();
-      totalCbm += value;
-      totalPrice += price;
-      inputHtml = `<input type="number" step="0.01" value="${item.expCbm || ""}" placeholder="CBM" onchange="updateShippingValue('${item.id}','expCbm',this.value)">`;
-      resultHtml = `<div class="ship-result">${value.toLocaleString("fr-FR")} CBM<br>${formatAr(price)}</div>`;
-    }else if(WEIGHT_MODES.includes(mode)){
+      totalCbm += value; totalPrice += price;
+      inputHtml = `<input type="number" step="0.01" value="${{item.expCbm || ""}}" placeholder="CBM" onchange="updateShippingValue('${{item.id}}','expCbm',this.value)">`;
+      resultHtml = `<div class="ship-result">${{value.toLocaleString("fr-FR")}} CBM<br>${{formatAr(price)}}</div>`;
+    }}else if(WEIGHT_MODES.includes(mode)){{
       value = parseFloat(item.expKg) || 0;
       price = value * getKgPrice(mode);
-      totalKg += value;
-      totalPrice += price;
-      inputHtml = `<input type="number" step="0.01" value="${item.expKg || ""}" placeholder="Kg" onchange="updateShippingValue('${item.id}','expKg',this.value)">`;
-      resultHtml = `<div class="ship-result">${value.toLocaleString("fr-FR")} Kg<br>${formatAr(price)}</div>`;
-    }
-
+      totalKg += value; totalPrice += price;
+      inputHtml = `<input type="number" step="0.01" value="${{item.expKg || ""}}" placeholder="Kg" onchange="updateShippingValue('${{item.id}}','expKg',this.value)">`;
+      resultHtml = `<div class="ship-result">${{value.toLocaleString("fr-FR")}} Kg<br>${{formatAr(price)}}</div>`;
+    }}
     box.innerHTML += `
       <div class="article">
         <div class="article compact">
-          <div class="article-icon">${MODE_INFO[mode]?.icon || "📦"}</div>
+          <div class="article-icon">${{MODE_INFO[mode]?.icon || "📦"}}</div>
           <div>
-            <div class="article-ref">${item.ref || ""}</div>
-            <div class="article-name">${item.name || ""}</div>
-            <div class="article-meta">${modeBadge(mode)}<span class="badge">Expédié : ${item.expedie || ""}</span></div>
-            <div class="count">${item.createdBy || ""}</div>
+            <div class="article-ref">${{item.ref || ""}}</div>
+            <div class="article-name">${{item.name || ""}}</div>
+            <div class="article-meta">${{modeBadge(mode)}}<span class="badge">Expédié : ${{item.expedie || ""}}</span></div>
+            <div class="count">${{item.createdBy || ""}}</div>
           </div>
-          <div class="article-actions"><button class="action-mini" onclick="openEditArticle('${item.id}')">Modifier</button></div>
+          <div class="article-actions"><button class="action-mini" onclick="openEditArticle('${{item.id}}')">Modifier</button></div>
         </div>
-        ${mode === "SEA" || WEIGHT_MODES.includes(mode) ? `
-          <div class="ship-box">
-            <div class="ship-row">
-              ${inputHtml}
-              ${resultHtml}
-            </div>
-          </div>
-        ` : ""}
-      </div>
-    `;
-  });
-
-  if(selectedExpMode === "SEA"){
-    summary.innerHTML = `
-      <div class="summary-box">
-        Total articles : ${articles.length}<br>
-        CBM total : ${totalCbm.toLocaleString("fr-FR")} CBM<br>
-        Prix total : ${formatAr(totalPrice)}
-      </div>
-    `;
-  }else if(WEIGHT_MODES.includes(selectedExpMode)){
-    summary.innerHTML = `
-      <div class="summary-box">
-        Total articles : ${articles.length}<br>
-        Kg total : ${totalKg.toLocaleString("fr-FR")} Kg<br>
-        Prix total : ${formatAr(totalPrice)}
-      </div>
-    `;
-  }else{
-    summary.innerHTML = `
-      <div class="summary-box">
-        Total articles : ${articles.length}
-      </div>
-    `;
-  }
-
+        ${{mode === "SEA" || WEIGHT_MODES.includes(mode) ? `
+          <div class="ship-box"><div class="ship-row">${{inputHtml}}${{resultHtml}}</div></div>
+        ` : ""}}
+      </div>`;
+  }});
+  if(selectedExpMode === "SEA"){{
+    summary.innerHTML = `<div class="summary-box">Total articles : ${{articles.length}}<br>CBM total : ${{totalCbm.toLocaleString("fr-FR")}} CBM<br>Prix total : ${{formatAr(totalPrice)}}</div>`;
+  }}else if(WEIGHT_MODES.includes(selectedExpMode)){{
+    summary.innerHTML = `<div class="summary-box">Total articles : ${{articles.length}}<br>Kg total : ${{totalKg.toLocaleString("fr-FR")}} Kg<br>Prix total : ${{formatAr(totalPrice)}}</div>`;
+  }}else{{
+    summary.innerHTML = `<div class="summary-box">Total articles : ${{articles.length}}</div>`;
+  }}
   document.getElementById("deleteAllExpBtn").style.display = "block";
   document.getElementById("downloadExpBtn").style.display = "block";
-}
-
-window.updateShippingValue = function(id,field,value){
-  update(ref(db,`articles/${id}`), {[field]: value});
-}
-
-window.selectExpDate = function(date){
-  selectedExpDate = date;
-  renderExpeditions();
-}
-
-window.deleteAllCurrentExpedition = function(){
+}}
+window.updateShippingValue = function(id,field,value){{ update(ref(db,`articles/${{id}}`), {{[field]: value}}); }}
+window.selectExpDate = function(date){{ selectedExpDate = date; renderExpeditions(); }}
+window.deleteAllCurrentExpedition = function(){{
   if(!selectedExpMode || !selectedExpDate) return;
-
-  let articles = getShippedArticles()
-    .filter(a=>a.mode === selectedExpMode)
-    .filter(a=>(a.expedie || "").trim() === selectedExpDate);
-
+  let articles = getShippedArticles().filter(a=>a.mode === selectedExpMode).filter(a=>(a.expedie || "").trim() === selectedExpDate);
   if(!articles.length) return;
-
-  let ok = confirm(`Supprimer définitivement ${articles.length} article(s) de ${selectedExpMode} du ${selectedExpDate} ?`);
+  let ok = confirm(`Supprimer définitivement ${{articles.length}} article(s) de ${{selectedExpMode}} du ${{selectedExpDate}} ?`);
   if(!ok) return;
-
   let verification = prompt(`Pour confirmer, écris SUPPRIMER`);
-  if(verification !== "SUPPRIMER"){
-    alert("Suppression annulée");
-    return;
-  }
+  if(verification !== "SUPPRIMER"){{ alert("Suppression annulée"); return; }}
+  articles.forEach(a=>{{ remove(ref(db,`articles/${{a.id}}`)); }});
+}}
 
-  articles.forEach(a=>{
-    remove(ref(db,`articles/${a.id}`));
-  });
-}
-
-/* AUTRES */
-window.downloadCurrentList = function(){
-  html2canvas(document.getElementById("listCapture")).then(canvas=>{
+window.downloadCurrentList = function(){{
+  html2canvas(document.getElementById("listCapture")).then(canvas=>{{
     let link = document.createElement("a");
-    link.download = `KIAH_${selectedMode || "liste"}.png`;
+    link.download = `KIAH_${{selectedMode || "liste"}}.png`;
     link.href = canvas.toDataURL("image/png");
     link.click();
-  });
-}
-
-window.downloadCurrentExpedition = function(){
-  html2canvas(document.getElementById("expCapture")).then(canvas=>{
+  }});
+}}
+window.downloadCurrentExpedition = function(){{
+  html2canvas(document.getElementById("expCapture")).then(canvas=>{{
     let link = document.createElement("a");
-    link.download = `KIAH_Expedition_${selectedExpMode || "liste"}_${selectedExpDate || "date"}.png`;
+    link.download = `KIAH_Expedition_${{selectedExpMode || "liste"}}_${{selectedExpDate || "date"}}.png`;
     link.href = canvas.toDataURL("image/png");
     link.click();
-  });
-}
-
-window.openTab = function(id,btn){
+  }});
+}}
+window.openTab = function(id,btn){{
   document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
-
   document.querySelectorAll(".tabs button").forEach(b=>b.classList.remove("active"));
   btn.classList.add("active");
-
   if(id === "frais") renderFraisInputs();
-  if(id === "expeditions"){
-    renderExpeditionModeButtons();
-    renderExpeditions();
-  }
-  window.scrollTo({top:0,behavior:"smooth"});
-}
-
-window.openTabById = function(id){
-  let btn = document.querySelector(`.tabs button[data-tab="${id}"]`);
+  if(id === "expeditions"){{ renderExpeditionModeButtons(); renderExpeditions(); }}
+  window.scrollTo({{top:0,behavior:"smooth"}});
+}}
+window.openTabById = function(id){{
+  let btn = document.querySelector(`.tabs button[data-tab="${{id}}"]`);
   if(btn) openTab(id,btn);
-}
+}}
 </script>
 
 </body>
-</html>
+</html>'''
+
+path = Path('/mnt/data/kiah_import_travel_edition.html')
+path.write_text(html, encoding='utf-8')
+print(path)
+print("size MB:", round(path.stat().st_size/1024/1024, 2))
