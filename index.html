@@ -480,6 +480,303 @@ label{display:block;color:var(--muted);font-size:12px;margin:8px 0 2px}
 @media (min-width:1000px){
   .tabs{left:50%;transform:translateX(-50%);max-width:760px}
 }
+
+/* === LOGIN PREMIUM GRAND RECTANGLE - GUANGZHOU === */
+.login{
+  min-height:100vh;
+  padding:24px;
+  background:
+    radial-gradient(circle at 75% 20%,rgba(24,215,255,.18),transparent 28%),
+    radial-gradient(circle at 18% 78%,rgba(255,63,180,.15),transparent 28%),
+    linear-gradient(135deg,rgba(2,6,17,.72),rgba(5,10,28,.88)),
+    linear-gradient(160deg,#020611,#07162b 54%,#020611);
+}
+.login:before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background:
+    linear-gradient(180deg,rgba(3,7,18,.18),rgba(3,7,18,.82)),
+    radial-gradient(circle at 85% 42%,rgba(24,215,255,.22),transparent 20%),
+    radial-gradient(circle at 15% 45%,rgba(255,63,180,.18),transparent 22%);
+  z-index:0;
+}
+.login-card{
+  position:relative;
+  z-index:1;
+  max-width:1060px;
+  min-height:620px;
+  padding:0;
+  display:grid;
+  grid-template-columns:1.05fr .95fr;
+  border-radius:34px;
+  overflow:hidden;
+  background:rgba(5,12,30,.74);
+  border:1px solid rgba(24,215,255,.44);
+  box-shadow:
+    0 30px 90px rgba(0,0,0,.58),
+    0 0 0 1px rgba(155,77,255,.22),
+    0 0 55px rgba(24,215,255,.18),
+    inset 0 1px 0 rgba(255,255,255,.06);
+  backdrop-filter:blur(22px);
+}
+.login-card:after{
+  content:"";
+  position:absolute;
+  inset:-2px;
+  background:linear-gradient(120deg,rgba(24,215,255,.8),transparent 28%,rgba(255,63,180,.7),transparent 70%,rgba(155,77,255,.8));
+  opacity:.45;
+  filter:blur(26px);
+  z-index:-1;
+}
+.login-brand-panel{
+  padding:44px;
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  background:
+    linear-gradient(180deg,rgba(7,22,50,.38),rgba(3,8,22,.78)),
+    radial-gradient(circle at 50% 32%,rgba(24,215,255,.16),transparent 34%);
+  border-right:1px solid rgba(120,185,255,.18);
+  overflow:hidden;
+}
+.login-brand-panel:before{
+  content:"广州进口";
+  position:absolute;
+  left:24px;
+  top:120px;
+  writing-mode:vertical-rl;
+  color:#ff54bd;
+  font-weight:900;
+  font-size:30px;
+  letter-spacing:8px;
+  text-shadow:0 0 18px rgba(255,63,180,.8);
+  opacity:.9;
+}
+.login-brand-panel:after{
+  content:"";
+  position:absolute;
+  inset:auto -20px 0 -20px;
+  height:145px;
+  background:
+    linear-gradient(180deg,transparent,rgba(2,6,17,.75)),
+    repeating-linear-gradient(90deg,rgba(24,215,255,.25) 0 2px,transparent 2px 58px);
+  opacity:.42;
+}
+.login-ship{
+  width:230px;
+  height:170px;
+  position:relative;
+  margin-bottom:18px;
+  filter:drop-shadow(0 0 25px rgba(24,215,255,.45));
+  animation:floaty 4.8s ease-in-out infinite;
+}
+.login-ship .hull{
+  position:absolute;left:20px;right:20px;bottom:30px;height:42px;
+  border:3px solid var(--cyan);border-top:none;border-radius:0 0 32px 32px;
+}
+.login-ship .hull:before{
+  content:"";position:absolute;left:-18px;top:-18px;width:55px;height:22px;
+  border-left:3px solid var(--cyan);border-bottom:3px solid var(--cyan);transform:skewX(-35deg);
+}
+.login-ship .box{
+  position:absolute;width:38px;height:32px;border:2px solid var(--cyan);bottom:72px;background:rgba(24,215,255,.08);
+}
+.login-ship .b1{left:58px}.login-ship .b2{left:98px}.login-ship .b3{left:138px}
+.login-ship .crane-line{
+  position:absolute;left:62px;top:28px;width:128px;height:3px;background:var(--cyan);box-shadow:0 0 12px var(--cyan);
+}
+.login-ship .crane-line:before{
+  content:"";position:absolute;left:18px;top:-30px;width:3px;height:66px;background:var(--cyan);
+}
+.login-ship .crane-line:after{
+  content:"";position:absolute;right:16px;top:0;width:2px;height:45px;background:var(--cyan);
+}
+.login-big-title{
+  font-size:clamp(42px,5.4vw,68px);
+  line-height:.92;
+  font-weight:950;
+  letter-spacing:7px;
+  margin:0;
+  color:white;
+  text-shadow:0 0 25px rgba(24,215,255,.65);
+}
+.login-big-title span{
+  color:#ff66d4;
+  text-shadow:0 0 28px rgba(255,63,180,.78);
+}
+.login-subtitle{
+  margin-top:16px;
+  color:var(--cyan);
+  letter-spacing:3px;
+  font-size:13px;
+  font-weight:800;
+}
+.login-features{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  width:100%;
+  margin-top:54px;
+  position:relative;
+  z-index:2;
+}
+.login-feature{
+  padding:14px 8px;
+  border-radius:18px;
+  background:rgba(8,20,42,.5);
+  border:1px solid rgba(120,185,255,.18);
+  color:#dbeafe;
+  font-size:12px;
+  font-weight:800;
+}
+.login-feature b{display:block;font-size:24px;margin-bottom:6px}
+.login-form-panel{
+  padding:48px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  background:
+    linear-gradient(135deg,rgba(5,10,28,.78),rgba(14,17,49,.72)),
+    radial-gradient(circle at 85% 15%,rgba(155,77,255,.15),transparent 28%);
+}
+.login-form-panel .logo-mark{
+  justify-content:center;
+  margin-bottom:28px;
+}
+.login-form-panel .logo-icon{
+  background:linear-gradient(135deg,rgba(24,215,255,.22),rgba(255,63,180,.16));
+}
+.login-form-panel .logo-text h1{
+  font-size:34px;
+  background:linear-gradient(135deg,#18d7ff,#9b4dff,#ff3fb4);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+}
+.login-welcome{
+  text-align:center;
+  color:#dbeafe;
+  margin:-10px 0 24px;
+  line-height:1.6;
+}
+.login-form-panel label{
+  color:#e9f5ff;
+  font-weight:800;
+  margin-top:12px;
+}
+.login-form-panel input{
+  height:58px;
+  padding-left:48px;
+  border-radius:16px;
+  background:rgba(5,13,31,.68);
+  border-color:rgba(120,185,255,.26);
+}
+.login-input-wrap{
+  position:relative;
+}
+.login-input-wrap .login-input-icon{
+  position:absolute;
+  left:16px;
+  top:50%;
+  transform:translateY(-50%);
+  z-index:1;
+  opacity:.9;
+  font-size:20px;
+}
+.login-pass-eye{
+  position:absolute;
+  right:8px;
+  top:50%;
+  transform:translateY(-50%);
+  z-index:2;
+  width:44px;
+  height:44px;
+  border-radius:14px;
+  background:transparent;
+  color:#cbe8ff;
+  padding:0;
+}
+.login-form-panel .primary{
+  height:58px;
+  font-size:17px;
+  margin-top:22px;
+  border-radius:16px;
+  box-shadow:0 0 28px rgba(37,99,255,.3),0 0 24px rgba(255,63,180,.18);
+}
+.login-safe{
+  text-align:center;
+  margin-top:22px;
+  color:#7fdfff;
+  font-size:13px;
+}
+.login-mini-line{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  margin:22px 0;
+  color:#7f94b2;
+}
+.login-mini-line:before,.login-mini-line:after{
+  content:"";
+  height:1px;
+  flex:1;
+  background:linear-gradient(90deg,transparent,rgba(120,185,255,.32),transparent);
+}
+@media (max-width:820px){
+  .login{
+    padding:14px;
+    align-items:flex-start;
+  }
+  .login-card{
+    max-width:460px;
+    min-height:auto;
+    grid-template-columns:1fr;
+    border-radius:30px;
+  }
+  .login-brand-panel{
+    min-height:280px;
+    padding:28px 22px;
+    border-right:none;
+    border-bottom:1px solid rgba(120,185,255,.18);
+  }
+  .login-brand-panel:before{
+    left:16px;
+    top:52px;
+    font-size:22px;
+    letter-spacing:5px;
+  }
+  .login-ship{
+    width:170px;
+    height:120px;
+    margin-bottom:10px;
+  }
+  .login-big-title{
+    font-size:42px;
+    letter-spacing:5px;
+  }
+  .login-features{
+    margin-top:24px;
+    gap:6px;
+  }
+  .login-feature{
+    font-size:10px;
+    padding:10px 5px;
+  }
+  .login-feature b{font-size:19px}
+  .login-form-panel{
+    padding:28px 20px 24px;
+  }
+  .login-form-panel .logo-mark{
+    display:none;
+  }
+}
+
 </style>
 </head>
 
@@ -487,17 +784,56 @@ label{display:block;color:var(--muted);font-size:12px;margin:8px 0 2px}
 
 <div id="loginScreen" class="login">
   <div class="login-card">
-    <div class="logo-mark">
-      <div class="logo-icon">🚢</div>
-      <div class="logo-text">
-        <h1>KIAH Import</h1>
-        <small>GUANGZHOU SYSTEM</small>
+    <div class="login-brand-panel">
+      <div class="login-ship">
+        <div class="crane-line"></div>
+        <div class="box b1"></div>
+        <div class="box b2"></div>
+        <div class="box b3"></div>
+        <div class="hull"></div>
+      </div>
+      <h1 class="login-big-title">KIAH<br><span>IMPORT</span></h1>
+      <div class="login-subtitle">GUANGZHOU IMPORT SYSTEM</div>
+      <div class="login-features">
+        <div class="login-feature"><b>📦</b>Importation rapide</div>
+        <div class="login-feature"><b>🛡️</b>Sécurisé & fiable</div>
+        <div class="login-feature"><b>🚚</b>Gestion complète</div>
       </div>
     </div>
-    <input id="emailInput" type="email" placeholder="Email">
-    <input id="passwordInput" type="password" placeholder="Mot de passe">
-    <button class="primary" onclick="login()">Se connecter</button>
-    <div id="errorBox" class="error"></div>
+
+    <div class="login-form-panel">
+      <div class="logo-mark">
+        <div class="logo-icon">🚢</div>
+        <div class="logo-text">
+          <h1>KIAH Import</h1>
+          <small>GUANGZHOU SYSTEM</small>
+        </div>
+      </div>
+
+      <div class="login-welcome">
+        Connectez-vous pour accéder à votre espace<br>
+        de gestion d’importation.
+      </div>
+
+      <label>Email</label>
+      <div class="login-input-wrap">
+        <span class="login-input-icon">✉️</span>
+        <input id="emailInput" type="email" placeholder="Entrez votre email">
+      </div>
+
+      <label>Mot de passe</label>
+      <div class="login-input-wrap">
+        <span class="login-input-icon">🔒</span>
+        <input id="passwordInput" type="password" placeholder="Entrez votre mot de passe">
+        <button class="login-pass-eye" onclick="togglePassword()" type="button">👁️</button>
+      </div>
+
+      <button class="primary" onclick="login()">Connexion →</button>
+      <div id="errorBox" class="error"></div>
+
+      <div class="login-mini-line">ou</div>
+      <div class="login-safe">🔐 Vos données sont sécurisées avec Firebase</div>
+    </div>
   </div>
 </div>
 
@@ -752,6 +1088,12 @@ function modeBadge(mode){
   if(mode === "AIR BATT") cls="batt";
   if(mode === "AUTRE") cls="autre";
   return `<span class="badge ${cls}">${mode || ""}</span>`;
+}
+
+
+window.togglePassword = function(){
+  const input = document.getElementById("passwordInput");
+  input.type = input.type === "password" ? "text" : "password";
 }
 
 window.login = function(){
