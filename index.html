@@ -8,166 +8,478 @@
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
 <style>
-*{box-sizing:border-box}
 :root{
-  --bg:#050816;
-  --bg2:#0b1028;
-  --card:rgba(255,255,255,.08);
-  --card2:rgba(255,255,255,.12);
-  --line:rgba(255,255,255,.14);
-  --text:#f8fafc;
-  --muted:#a7b0c5;
-  --blue:#38bdf8;
-  --violet:#8b5cf6;
-  --green:#22c55e;
-  --red:#ef4444;
-  --yellow:#facc15;
+  --bg:#050914;
+  --bg2:#081326;
+  --card:rgba(13,28,54,.72);
+  --card2:rgba(9,19,39,.86);
+  --line:rgba(120,185,255,.22);
+  --text:#eef7ff;
+  --muted:#9eb6d3;
+  --cyan:#18d7ff;
+  --blue:#2563ff;
+  --violet:#9b4dff;
+  --pink:#ff3fb4;
+  --orange:#ff9f1c;
+  --red:#ff3f5f;
+  --green:#28e18f;
+  --shadow:0 18px 55px rgba(0,0,0,.42);
 }
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
 body{
   margin:0;
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  color:var(--text);
   background:
-    radial-gradient(circle at top left,rgba(56,189,248,.25),transparent 32%),
-    radial-gradient(circle at top right,rgba(139,92,246,.25),transparent 34%),
-    linear-gradient(160deg,var(--bg),var(--bg2));
-  color:var(--text);
+    radial-gradient(circle at 15% 10%,rgba(24,215,255,.18),transparent 30%),
+    radial-gradient(circle at 85% 5%,rgba(255,63,180,.14),transparent 28%),
+    radial-gradient(circle at 50% 80%,rgba(155,77,255,.16),transparent 35%),
+    linear-gradient(160deg,#020611,#07162b 54%,#020611);
   min-height:100vh;
+  overflow-x:hidden;
 }
-button,input,select{font-family:inherit}
-input,select{
-  width:100%;
-  padding:15px;
-  border:1px solid var(--line);
-  border-radius:18px;
-  margin:7px 0;
-  background:rgba(255,255,255,.08);
-  color:var(--text);
-  font-size:16px;
-  outline:none;
+body:before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background:
+    linear-gradient(rgba(24,215,255,.055) 1px, transparent 1px),
+    linear-gradient(90deg,rgba(24,215,255,.045) 1px, transparent 1px);
+  background-size:42px 42px;
+  mask-image:linear-gradient(to bottom,rgba(0,0,0,.65),transparent 82%);
+  animation:gridMove 18s linear infinite;
+  z-index:-2;
 }
-select option{background:#111827;color:white}
-input::placeholder{color:#7f8aa3}
-input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(56,189,248,.16)}
-button{
-  border:none;
-  border-radius:18px;
-  padding:13px 16px;
-  font-weight:800;
-  font-size:15px;
-  cursor:pointer;
+body:after{
+  content:"广州进口  GUANGZHOU IMPORT";
+  position:fixed;
+  left:50%;
+  top:44%;
+  transform:translate(-50%,-50%) rotate(-10deg);
+  font-weight:900;
+  letter-spacing:8px;
+  color:rgba(24,215,255,.055);
+  font-size:clamp(34px,9vw,130px);
+  white-space:nowrap;
+  pointer-events:none;
+  z-index:-1;
 }
+@keyframes gridMove{from{background-position:0 0}to{background-position:42px 84px}}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes glowPulse{0%,100%{box-shadow:0 0 18px rgba(24,215,255,.22)}50%{box-shadow:0 0 34px rgba(155,77,255,.34)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shine{from{transform:translateX(-120%)}to{transform:translateX(120%)}}
+
 .login{
   min-height:100vh;
   display:flex;
   align-items:center;
   justify-content:center;
-  padding:25px;
+  padding:22px;
 }
 .login-card{
-  background:rgba(255,255,255,.1);
-  backdrop-filter:blur(18px);
-  border:1px solid var(--line);
   width:100%;
-  max-width:390px;
+  max-width:420px;
+  background:linear-gradient(145deg,rgba(14,31,59,.86),rgba(6,13,29,.9));
+  border:1px solid var(--line);
   border-radius:30px;
-  padding:28px;
-  box-shadow:0 25px 80px rgba(0,0,0,.32);
+  padding:26px;
+  box-shadow:var(--shadow),0 0 38px rgba(24,215,255,.14);
+  backdrop-filter:blur(18px);
+  position:relative;
+  overflow:hidden;
 }
-.login-card h1{margin:0 0 25px;font-size:32px;background:linear-gradient(90deg,var(--blue),var(--violet));-webkit-background-clip:text;color:transparent}
+.login-card:before,.card:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(105deg,transparent 0%,rgba(255,255,255,.08) 45%,transparent 55%);
+  transform:translateX(-120%);
+  animation:shine 7s ease-in-out infinite;
+  pointer-events:none;
+}
+.logo-mark{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  margin-bottom:16px;
+}
+.logo-icon{
+  width:54px;
+  height:54px;
+  border-radius:18px;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(135deg,rgba(24,215,255,.22),rgba(155,77,255,.2));
+  border:1px solid rgba(24,215,255,.42);
+  box-shadow:0 0 24px rgba(24,215,255,.18);
+  font-size:28px;
+}
+.logo-text h1{margin:0;font-size:26px;letter-spacing:.5px}
+.logo-text small{color:var(--cyan);letter-spacing:2px;font-size:11px}
+input,select,textarea{
+  width:100%;
+  padding:14px 15px;
+  border:1px solid rgba(120,185,255,.22);
+  border-radius:16px;
+  margin:7px 0;
+  background:rgba(5,13,31,.76);
+  color:var(--text);
+  outline:none;
+  font-size:15px;
+  transition:.22s;
+}
+textarea{min-height:86px;resize:vertical}
+input:focus,select:focus,textarea:focus{
+  border-color:rgba(24,215,255,.8);
+  box-shadow:0 0 0 4px rgba(24,215,255,.09),0 0 16px rgba(24,215,255,.18);
+}
+input::placeholder,textarea::placeholder{color:#7289a7}
+button{
+  border:none;
+  border-radius:16px;
+  padding:13px 16px;
+  font-weight:800;
+  font-size:15px;
+  color:var(--text);
+  cursor:pointer;
+  transition:.22s ease;
+  position:relative;
+  overflow:hidden;
+}
+button:active{transform:scale(.97)}
 .primary{
   width:100%;
-  background:linear-gradient(135deg,var(--blue),var(--violet));
-  color:white;
+  background:linear-gradient(135deg,var(--cyan),var(--blue),var(--violet));
+  box-shadow:0 12px 30px rgba(37,99,255,.28);
   margin-top:8px;
-  box-shadow:0 12px 28px rgba(56,189,248,.18);
 }
-.error{color:#fca5a5;margin-top:10px;font-size:13px}
-.app{display:none;padding-bottom:112px}
+.secondary{
+  background:rgba(20,40,75,.84);
+  border:1px solid rgba(120,185,255,.2);
+  color:#dcecff;
+}
+.danger{background:linear-gradient(135deg,#ff315b,#9f1239);color:white}
+.success{background:linear-gradient(135deg,#0dd98d,#0284c7);color:white}
+.error{color:#ff7890;margin-top:10px;font-size:13px}
+.app{display:none;padding-bottom:110px;animation:slideUp .5s ease}
 .top{
-  padding:18px 16px 24px;
-  background:rgba(255,255,255,.06);
+  padding:20px 16px 22px;
+  position:sticky;
+  top:0;
+  z-index:15;
   backdrop-filter:blur(16px);
-  border-bottom:1px solid var(--line);
-  border-bottom-left-radius:30px;
-  border-bottom-right-radius:30px;
+  background:linear-gradient(180deg,rgba(4,9,22,.92),rgba(4,9,22,.65));
+  border-bottom:1px solid rgba(120,185,255,.14);
 }
-.top-row{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.top h1{font-size:26px;margin:0;background:linear-gradient(90deg,var(--blue),#fff,var(--violet));-webkit-background-clip:text;color:transparent}
+.top-row{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.top h1{font-size:24px;margin:0}
 .top small{color:var(--muted)}
-.user-btn{background:rgba(255,255,255,.12);color:white;border:1px solid var(--line);padding:10px 12px;border-radius:16px;font-size:13px}
-.container{padding:16px;max-width:850px;margin:auto}
+.user-btn,.icon-btn{
+  background:rgba(12,26,53,.82);
+  border:1px solid rgba(120,185,255,.22);
+  color:#dff4ff;
+}
+.icon-btn{min-width:48px}
+.container{padding:16px;max-width:1180px;margin:auto}
+.section{display:none;animation:slideUp .28s ease}
+.section.active{display:block}
 .card{
-  background:var(--card);
-  border:1px solid var(--line);
+  background:linear-gradient(145deg,rgba(12,26,52,.78),rgba(5,12,28,.84));
+  border:1px solid rgba(120,185,255,.18);
   border-radius:28px;
   padding:18px;
-  margin-bottom:15px;
-  box-shadow:0 18px 55px rgba(0,0,0,.22);
-  backdrop-filter:blur(16px);
+  margin-bottom:16px;
+  box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.04);
+  backdrop-filter:blur(18px);
+  position:relative;
+  overflow:hidden;
 }
-.card h2{margin:0 0 12px;font-size:22px}
-.result{
-  font-size:30px;
-  font-weight:950;
-  margin-top:12px;
-  color:white;
-  text-shadow:0 0 22px rgba(56,189,248,.45);
+.card h2{margin:0 0 12px;font-size:21px}
+.card-title-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.hero{
+  min-height:190px;
+  border-radius:30px;
+  padding:22px;
+  background:
+    linear-gradient(180deg,rgba(2,6,17,.18),rgba(2,6,17,.72)),
+    radial-gradient(circle at 50% 20%,rgba(24,215,255,.18),transparent 38%),
+    linear-gradient(135deg,rgba(24,215,255,.12),rgba(155,77,255,.1));
+  border:1px solid rgba(24,215,255,.22);
+  overflow:hidden;
 }
+.hero h2{font-size:28px;margin:0 0 6px}
+.hero p{margin:0;color:#d3e6ff}
+.skyline{
+  height:88px;
+  margin-top:18px;
+  position:relative;
+  opacity:.95;
+  animation:floaty 5.5s ease-in-out infinite;
+}
+.tower,.building,.crane{
+  position:absolute;
+  bottom:0;
+  border:1px solid rgba(24,215,255,.58);
+  background:linear-gradient(180deg,rgba(24,215,255,.18),rgba(155,77,255,.06));
+  box-shadow:0 0 18px rgba(24,215,255,.2);
+}
+.tower{left:50%;width:18px;height:82px;border-radius:12px 12px 2px 2px}
+.tower:before{content:"";position:absolute;left:50%;top:-20px;width:2px;height:20px;background:var(--cyan)}
+.building:nth-child(1){left:6%;width:34px;height:44px}
+.building:nth-child(2){left:19%;width:46px;height:62px}
+.building:nth-child(3){left:34%;width:28px;height:50px}
+.building:nth-child(5){right:32%;width:42px;height:54px}
+.building:nth-child(6){right:17%;width:30px;height:72px}
+.building:nth-child(7){right:5%;width:48px;height:46px}
+.crane{left:8%;bottom:50px;width:90px;height:3px;background:var(--orange);border-color:rgba(255,159,28,.8);box-shadow:0 0 18px rgba(255,159,28,.35)}
+.crane:before{content:"";position:absolute;left:8px;top:3px;width:3px;height:36px;background:rgba(255,159,28,.9)}
+.neon-cn{
+  display:inline-block;
+  color:#ff68bf;
+  text-shadow:0 0 12px rgba(255,63,180,.72);
+  border:1px solid rgba(255,63,180,.4);
+  padding:7px 12px;
+  border-radius:14px;
+  margin-top:10px;
+  letter-spacing:2px;
+}
+.stat-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+}
+.stat-card{
+  border-radius:22px;
+  padding:16px;
+  background:rgba(8,20,42,.75);
+  border:1px solid rgba(120,185,255,.18);
+  min-height:112px;
+}
+.stat-card strong{display:block;font-size:29px;margin:7px 0}
+.stat-card small{color:var(--muted)}
+.cyan{border-color:rgba(24,215,255,.45);box-shadow:0 0 24px rgba(24,215,255,.08)}
+.violet{border-color:rgba(155,77,255,.45);box-shadow:0 0 24px rgba(155,77,255,.09)}
+.orange{border-color:rgba(255,159,28,.45);box-shadow:0 0 24px rgba(255,159,28,.09)}
+.red{border-color:rgba(255,63,95,.45);box-shadow:0 0 24px rgba(255,63,95,.09)}
+.green{border-color:rgba(40,225,143,.45);box-shadow:0 0 24px rgba(40,225,143,.09)}
 .tabs{
   position:fixed;
   bottom:12px;
   left:10px;
   right:10px;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:7px;
+  z-index:30;
+  padding:9px;
+  border-radius:26px;
+  background:rgba(7,16,35,.88);
+  border:1px solid rgba(120,185,255,.22);
+  backdrop-filter:blur(20px);
+  box-shadow:0 12px 40px rgba(0,0,0,.45),0 0 28px rgba(24,215,255,.1);
+}
+.tabs button{
+  padding:10px 6px;
+  min-height:58px;
+  font-size:12px;
+  background:transparent;
+  color:#9eb6d3;
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  align-items:center;
+  justify-content:center;
+}
+.tabs button .ico{font-size:19px}
+.tabs button.active{
+  color:white;
+  background:linear-gradient(135deg,rgba(24,215,255,.24),rgba(155,77,255,.28));
+  box-shadow:0 0 22px rgba(24,215,255,.18);
+  border:1px solid rgba(24,215,255,.3);
+}
+.logout{
+  position:fixed;
+  right:14px;
+  bottom:92px;
+  background:linear-gradient(135deg,#ff315b,#7f1d1d);
+  color:white;
+  z-index:31;
+  border:1px solid rgba(255,255,255,.12);
+}
+.mode-buttons,.date-buttons,.filter-chips{
   display:flex;
   gap:8px;
-  z-index:20;
-  padding:8px;
-  background:rgba(5,8,22,.72);
-  backdrop-filter:blur(18px);
-  border:1px solid var(--line);
-  border-radius:24px;
+  overflow-x:auto;
+  padding:6px 0 12px;
+  scrollbar-width:none;
 }
-.tabs button{flex:1;background:rgba(255,255,255,.08);color:var(--muted);padding:13px 6px;font-size:13px}
-.tabs button.active{background:linear-gradient(135deg,var(--blue),var(--violet));color:white}
-.logout{position:fixed;right:14px;bottom:88px;background:rgba(239,68,68,.92);color:white;z-index:30;box-shadow:0 12px 30px rgba(239,68,68,.2)}
-.section{display:none}
-.section.active{display:block}
-.mode-buttons,.date-buttons,.frais-buttons{display:flex;gap:8px;overflow-x:auto;padding:6px 0 12px}
-.mode-buttons button,.date-buttons button,.frais-buttons button{white-space:nowrap;background:rgba(255,255,255,.08);color:#dbeafe;border:1px solid var(--line)}
-.mode-buttons button.active,.date-buttons button.active,.frais-buttons button.active{background:linear-gradient(135deg,var(--blue),var(--violet));color:white}
+.mode-buttons::-webkit-scrollbar,.date-buttons::-webkit-scrollbar,.filter-chips::-webkit-scrollbar{display:none}
+.mode-buttons button,.date-buttons button,.chip{
+  white-space:nowrap;
+  background:rgba(13,28,54,.78);
+  color:#cbe8ff;
+  border:1px solid rgba(120,185,255,.2);
+  padding:11px 14px;
+}
+.mode-buttons button.active,.date-buttons button.active,.chip.active{
+  background:linear-gradient(135deg,rgba(24,215,255,.24),rgba(155,77,255,.28));
+  color:white;
+  border-color:rgba(24,215,255,.55);
+  box-shadow:0 0 22px rgba(24,215,255,.12);
+}
+.frais-panel{display:grid;grid-template-columns:1fr 1.35fr;gap:14px}
+.frais-types{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.type-card{
+  min-height:102px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  gap:8px;
+  background:rgba(8,20,42,.78);
+  border:1px solid rgba(120,185,255,.18);
+  border-radius:22px;
+  font-weight:900;
+}
+.type-card.active{animation:glowPulse 2.4s ease-in-out infinite;border-color:rgba(24,215,255,.78)}
+.type-card span{font-size:30px}
+.result{
+  font-size:clamp(28px,7vw,46px);
+  font-weight:950;
+  color:var(--cyan);
+  text-shadow:0 0 18px rgba(24,215,255,.24);
+  margin-top:12px;
+  padding:16px;
+  border-radius:20px;
+  background:rgba(24,215,255,.07);
+  border:1px solid rgba(24,215,255,.22);
+}
+.article-grid{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:10px;
+  margin-top:8px;
+}
+.category-card{
+  border-radius:22px;
+  padding:15px;
+  min-height:118px;
+  background:rgba(8,20,42,.75);
+  border:1px solid rgba(120,185,255,.18);
+  cursor:pointer;
+  transition:.25s;
+}
+.category-card:hover{transform:translateY(-3px)}
+.category-card.active{border-color:rgba(24,215,255,.72);box-shadow:0 0 26px rgba(24,215,255,.13)}
+.category-card .big{font-size:28px;font-weight:950;margin:8px 0}
+.search-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
 .article{
-  border:1px solid var(--line);
+  border:1px solid rgba(120,185,255,.16);
   border-radius:22px;
   padding:14px;
-  margin-top:12px;
-  background:rgba(255,255,255,.07);
+  margin-top:10px;
+  background:linear-gradient(135deg,rgba(11,25,51,.86),rgba(5,12,28,.78));
+  transition:.22s;
+  animation:slideUp .25s ease;
 }
-.article.compact{padding:12px}
-.article-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
-.article-ref{font-weight:950;font-size:17px;color:white}
-.article-name{color:#dbeafe;margin-top:4px}
-.badge{background:rgba(56,189,248,.15);color:#bae6fd;border:1px solid rgba(56,189,248,.28);border-radius:999px;padding:5px 9px;font-size:12px;font-weight:900;height:max-content;white-space:nowrap}
-.count{color:var(--muted);font-size:13px;margin-top:4px}
-.status-line{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
-.mini-status{background:rgba(255,255,255,.08);color:#cbd5e1;padding:7px 9px;border-radius:999px;font-size:12px;font-weight:800}
-.mini-status.done{background:rgba(250,204,21,.18);color:#fde68a;border:1px solid rgba(250,204,21,.25)}
-.action-row{display:flex;gap:8px;margin-top:10px}
-.action-row button{flex:1;font-size:13px;padding:11px 10px}
-.edit-btn{background:rgba(56,189,248,.18);color:#bae6fd;border:1px solid rgba(56,189,248,.3)}
-.delete{background:rgba(239,68,68,.88);color:white;width:100%}
-.save{background:linear-gradient(135deg,var(--green),#16a34a);color:white;width:100%}
-.cancel{background:rgba(255,255,255,.1);color:white;width:100%;border:1px solid var(--line)}
-.delete-all{background:#b91c1c;color:white;width:100%;margin-top:18px}
-.download{background:linear-gradient(135deg,#22c55e,#16a34a);color:white;margin-top:14px;width:100%}
+.article:hover{border-color:rgba(24,215,255,.38);transform:translateY(-2px)}
+.article.compact{
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  gap:12px;
+  align-items:center;
+}
+.article-icon{
+  width:50px;height:50px;border-radius:18px;
+  display:grid;place-items:center;font-size:27px;
+  background:rgba(24,215,255,.09);
+  border:1px solid rgba(120,185,255,.22);
+}
+.article-ref{font-weight:950;font-size:16px}
+.article-name{color:#dcecff;margin-top:4px}
+.article-meta{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
+.badge{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  background:rgba(24,215,255,.1);
+  color:#8beeff;
+  border:1px solid rgba(24,215,255,.25);
+  border-radius:999px;
+  padding:5px 9px;
+  font-size:11px;
+  font-weight:900;
+}
+.badge.air{background:rgba(155,77,255,.12);color:#d5b8ff;border-color:rgba(155,77,255,.3)}
+.badge.exp{background:rgba(255,159,28,.12);color:#ffc66b;border-color:rgba(255,159,28,.32)}
+.badge.batt{background:rgba(255,63,95,.12);color:#ff9aaa;border-color:rgba(255,63,95,.32)}
+.badge.autre{background:rgba(150,165,190,.12);color:#d5e3f7;border-color:rgba(150,165,190,.25)}
+.count{color:var(--muted);font-size:13px}
+.article-actions{display:flex;gap:8px;align-items:center}
+.action-mini{padding:10px 12px;font-size:13px;background:rgba(37,99,255,.28);border:1px solid rgba(37,99,255,.32)}
+.status-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px}
+.status{background:rgba(20,40,75,.76);border:1px solid rgba(120,185,255,.16);color:#dcecff;padding:10px 6px;border-radius:15px;font-size:12px}
+.status.done{background:rgba(40,225,143,.16);border-color:rgba(40,225,143,.32);color:#8dffc8}
 .empty{color:var(--muted);text-align:center;padding:22px}
-.ship-box{margin-top:12px;background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:18px;padding:12px}
+.ship-box{margin-top:12px;background:rgba(5,13,31,.58);border:1px solid rgba(120,185,255,.16);border-radius:18px;padding:12px}
 .ship-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:center}
-.ship-row input{margin:0;padding:12px;border-radius:14px}
-.ship-result{font-weight:950;color:#bae6fd;text-align:right}
-.summary-box{margin-top:16px;background:rgba(56,189,248,.12);color:#e0f2fe;border:1px solid rgba(56,189,248,.22);border-radius:20px;padding:14px;font-weight:950;line-height:1.7}
-.edit-panel{margin-top:12px;padding:12px;border-radius:20px;background:rgba(0,0,0,.18);border:1px solid var(--line)}
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-@media(max-width:520px){.grid-2{grid-template-columns:1fr}.ship-row{grid-template-columns:1fr}.ship-result{text-align:left}.top h1{font-size:23px}}
+.ship-row input{margin:0}
+.ship-result{font-weight:950;color:var(--cyan);text-align:right}
+.summary-box{margin-top:16px;background:rgba(24,215,255,.08);border:1px solid rgba(24,215,255,.2);color:#dff8ff;border-radius:20px;padding:14px;font-weight:900;line-height:1.8}
+.modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.65);
+  z-index:80;
+  padding:18px;
+  align-items:center;
+  justify-content:center;
+  backdrop-filter:blur(10px);
+}
+.modal.show{display:flex}
+.modal-card{
+  width:100%;
+  max-width:560px;
+  max-height:92vh;
+  overflow:auto;
+  background:linear-gradient(145deg,rgba(12,26,52,.96),rgba(5,12,28,.98));
+  border:1px solid rgba(120,185,255,.26);
+  border-radius:28px;
+  padding:18px;
+  box-shadow:0 25px 80px rgba(0,0,0,.58),0 0 40px rgba(24,215,255,.14);
+  animation:slideUp .24s ease;
+}
+.modal-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-grid .full{grid-column:1/-1}
+label{display:block;color:var(--muted);font-size:12px;margin:8px 0 2px}
+.modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.download{background:linear-gradient(135deg,#0dd98d,#2563ff);color:white;margin-top:14px;width:100%}
+.delete-all{background:linear-gradient(135deg,#ff315b,#7f1d1d);color:white;width:100%;margin-top:12px}
+@media (max-width:800px){
+  .container{padding:12px}
+  .top{padding:16px 12px}
+  .top h1{font-size:20px}
+  .hero{min-height:180px;padding:18px}
+  .stat-grid{grid-template-columns:1fr 1fr}
+  .frais-panel{grid-template-columns:1fr}
+  .article-grid{grid-template-columns:1fr 1fr}
+  .article.compact{grid-template-columns:auto 1fr;align-items:start}
+  .article-actions{grid-column:1/-1}
+  .action-mini{width:100%}
+  .search-row{grid-template-columns:1fr}
+  .form-grid{grid-template-columns:1fr}
+  .tabs{bottom:8px;left:8px;right:8px;border-radius:22px}
+  .tabs button{font-size:11px;min-height:54px}
+  .logout{bottom:86px;right:10px;padding:10px 12px;font-size:12px}
+}
+@media (min-width:1000px){
+  .tabs{left:50%;transform:translateX(-50%);max-width:760px}
+}
 </style>
 </head>
 
@@ -175,7 +487,13 @@ button{
 
 <div id="loginScreen" class="login">
   <div class="login-card">
-    <h1>KIAH Import</h1>
+    <div class="logo-mark">
+      <div class="logo-icon">🚢</div>
+      <div class="logo-text">
+        <h1>KIAH Import</h1>
+        <small>GUANGZHOU SYSTEM</small>
+      </div>
+    </div>
     <input id="emailInput" type="email" placeholder="Email">
     <input id="passwordInput" type="password" placeholder="Mot de passe">
     <button class="primary" onclick="login()">Se connecter</button>
@@ -187,9 +505,9 @@ button{
 
   <div class="top">
     <div class="top-row">
-      <button class="user-btn" onclick="changeUser()">Changer utilisateur</button>
+      <button class="user-btn" onclick="changeUser()">👤 Changer utilisateur</button>
       <div style="text-align:right">
-        <h1>KIAH Import</h1>
+        <h1>🚢 KIAH Import</h1>
         <small id="currentUserLabel">Utilisateur</small>
       </div>
     </div>
@@ -197,64 +515,70 @@ button{
 
   <div class="container">
 
-    <div id="frais" class="section active">
+    <div id="home" class="section active">
+      <div class="card hero">
+        <h2>Bonjour, Kiah 👋</h2>
+        <p>Vue claire de vos articles, frais et expéditions.</p>
+        <div class="neon-cn">广州进口</div>
+        <div class="skyline">
+          <div class="building"></div><div class="building"></div><div class="building"></div>
+          <div class="tower"></div>
+          <div class="building"></div><div class="building"></div><div class="building"></div>
+          <div class="crane"></div>
+        </div>
+      </div>
+
+      <div class="stat-grid" id="homeStats"></div>
+
+      <div class="card">
+        <div class="card-title-row">
+          <h2>Résumé par type</h2>
+          <button class="secondary" onclick="openTabById('articles')">Voir articles</button>
+        </div>
+        <div class="article-grid" id="homeTypeGrid"></div>
+      </div>
+    </div>
+
+    <div id="frais" class="section">
       <div class="card">
         <h2>Frais</h2>
-        <div class="frais-buttons">
-          <button id="btnFraisSEA" class="active" onclick="selectFraisMode('SEA')">SEA</button>
-          <button id="btnFraisAIR" onclick="selectFraisMode('AIR')">AIR</button>
-          <button id="btnFraisEXP" onclick="selectFraisMode('EXP')">EXP</button>
-          <button id="btnFraisAIRBATT" onclick="selectFraisMode('AIR BATT')">AIR BATT</button>
-        </div>
-
-        <div id="calcSeaBox">
-          <input id="cbm" type="number" placeholder="CBM" oninput="calcAll(); renderExpeditions();">
-          <input id="prixCBM" type="number" value="360" placeholder="Prix CBM en dollar" oninput="calcAll(); renderExpeditions();">
-          <input id="usd" type="number" value="4750" placeholder="Dollar en Ariary" oninput="calcAll(); renderExpeditions();">
-          <div class="result" id="resultSea">0 Ar</div>
-        </div>
-
-        <div id="calcAirBox" style="display:none">
-          <input id="kg" type="number" placeholder="Poids Kg" oninput="calcAll(); renderExpeditions();">
-          <input id="prixKg" type="number" value="69000" placeholder="Prix Kg AIR" oninput="calcAll(); renderExpeditions();">
-          <div class="result" id="resultAir">0 Ar</div>
-        </div>
-
-        <div id="calcExpBox" style="display:none">
-          <input id="kgExp" type="number" placeholder="Poids Kg" oninput="calcAll(); renderExpeditions();">
-          <input id="prixKgExp" type="number" value="80000" placeholder="Prix Kg EXP" oninput="calcAll(); renderExpeditions();">
-          <div class="result" id="resultExp">0 Ar</div>
-        </div>
-
-        <div id="calcAirBattBox" style="display:none">
-          <input id="kgAirBatt" type="number" placeholder="Poids Kg" oninput="calcAll(); renderExpeditions();">
-          <input id="prixKgAirBatt" type="number" value="120000" placeholder="Prix Kg AIR BATT" oninput="calcAll(); renderExpeditions();">
-          <div class="result" id="resultAirBatt">0 Ar</div>
+        <div class="frais-panel">
+          <div>
+            <div class="frais-types">
+              <button class="type-card active" id="typeSEA" onclick="selectFraisType('SEA')"><span>🚢</span>SEA</button>
+              <button class="type-card" id="typeAIR" onclick="selectFraisType('AIR')"><span>✈️</span>AIR</button>
+              <button class="type-card" id="typeEXP" onclick="selectFraisType('EXP')"><span>🚀</span>EXP</button>
+              <button class="type-card" id="typeAIR BATT" onclick="selectFraisType('AIR BATT')"><span>🔋</span>AIR BATT</button>
+            </div>
+          </div>
+          <div id="fraisInputs"></div>
         </div>
       </div>
     </div>
 
-    <div id="list" class="section">
+    <div id="articles" class="section">
       <div class="card">
-        <h2>Inscription article</h2>
-        <input id="refInput" placeholder="Référence article">
-        <input id="nameInput" placeholder="Nom de l’article">
-        <select id="modeInput">
-          <option>SEA</option>
-          <option>AIR</option>
-          <option>EXP</option>
-          <option>AIR BATT</option>
-          <option>AUTRE</option>
-        </select>
-        <button class="primary" onclick="addItem()">Ajouter</button>
-
-        <div id="modeButtons" class="mode-buttons"></div>
-        <div id="categoryTotal" class="count"></div>
+        <div class="card-title-row">
+          <div>
+            <h2>Articles</h2>
+            <div class="count">Gestion compacte pour éviter les listes trop chargées</div>
+          </div>
+          <button class="primary" style="width:auto" onclick="openAddArticle()">+ Ajouter</button>
+        </div>
+        <div class="article-grid" id="articleCategoryCards"></div>
       </div>
 
       <div id="listCapture" class="card">
-        <h2 id="listTitle">Liste articles</h2>
-        <input id="searchInput" placeholder="Recherche par référence ou nom" oninput="renderArticles()">
+        <div class="card-title-row">
+          <h2 id="listTitle">Liste articles</h2>
+          <button class="secondary" onclick="toggleArchiveView()" id="archiveToggle">Archives</button>
+        </div>
+        <div class="search-row">
+          <input id="searchInput" placeholder="🔍 Recherche : référence, nom, date..." oninput="renderArticles()">
+          <button class="secondary" onclick="clearSearch()">Effacer</button>
+        </div>
+        <div class="filter-chips" id="modeButtons"></div>
+        <div id="categoryTotal" class="count"></div>
         <div id="items"></div>
         <button class="download" onclick="downloadCurrentList()">Télécharger liste PNG</button>
       </div>
@@ -276,7 +600,7 @@ button{
           Capturer cette liste PNG
         </button>
         <button id="deleteAllExpBtn" class="delete-all" onclick="deleteAllCurrentExpedition()" style="display:none;">
-          Supprimer tout cette liste
+          Supprimer toute cette liste
         </button>
       </div>
     </div>
@@ -286,9 +610,76 @@ button{
   <button class="logout" onclick="logout()">Déconnexion</button>
 
   <div class="tabs">
-    <button class="active" onclick="openTab('frais',this)">Frais</button>
-    <button onclick="openTab('list',this)">Articles</button>
-    <button onclick="openTab('expeditions',this)">Expéditions</button>
+    <button class="active" data-tab="home" onclick="openTab('home',this)"><span class="ico">🏠</span>Accueil</button>
+    <button data-tab="frais" onclick="openTab('frais',this)"><span class="ico">🧮</span>Frais</button>
+    <button data-tab="articles" onclick="openTab('articles',this)"><span class="ico">📦</span>Articles</button>
+    <button data-tab="expeditions" onclick="openTab('expeditions',this)"><span class="ico">🚚</span>Expéditions</button>
+  </div>
+</div>
+
+<div class="modal" id="articleModal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h2 id="modalTitle">Modifier article</h2>
+      <button class="secondary" onclick="closeArticleModal()">✕</button>
+    </div>
+
+    <div class="form-grid">
+      <div class="full">
+        <label>Référence</label>
+        <input id="modalRef" placeholder="Référence article">
+      </div>
+      <div class="full">
+        <label>Nom de l’article</label>
+        <input id="modalName" placeholder="Nom de l’article">
+      </div>
+      <div>
+        <label>Type</label>
+        <select id="modalMode">
+          <option>SEA</option>
+          <option>AIR</option>
+          <option>EXP</option>
+          <option>AIR BATT</option>
+          <option>AUTRE</option>
+        </select>
+      </div>
+      <div>
+        <label>Statut</label>
+        <select id="modalArchived">
+          <option value="active">Actif</option>
+          <option value="archived">Archivé</option>
+        </select>
+      </div>
+      <div>
+        <label>Date Achat</label>
+        <input id="modalAchat" placeholder="ex: 21/05/2026">
+      </div>
+      <div>
+        <label>Date Dépôt</label>
+        <input id="modalDepot" placeholder="ex: 22/05/2026">
+      </div>
+      <div class="full">
+        <label>Date Expédié</label>
+        <input id="modalExpedie" placeholder="Laisser vide si pas encore expédié">
+      </div>
+      <div id="modalCbmBox">
+        <label>CBM expédition</label>
+        <input id="modalCbm" type="number" step="0.01" placeholder="CBM">
+      </div>
+      <div id="modalKgBox">
+        <label>Kg expédition</label>
+        <input id="modalKg" type="number" step="0.01" placeholder="Kg">
+      </div>
+      <div class="full">
+        <label>Notes</label>
+        <textarea id="modalNote" placeholder="Note optionnelle..."></textarea>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="success" onclick="saveArticleModal()">Enregistrer</button>
+      <button class="danger" id="modalDeleteBtn" onclick="deleteArticleFromModal()">Supprimer</button>
+    </div>
   </div>
 </div>
 
@@ -313,18 +704,26 @@ const auth = getAuth(appFirebase);
 
 const MODES = ["SEA","AIR","EXP","AIR BATT","AUTRE"];
 const WEIGHT_MODES = ["AIR","EXP","AIR BATT"];
+const MODE_INFO = {
+  "SEA": {icon:"🚢", cls:"cyan"},
+  "AIR": {icon:"✈️", cls:"violet"},
+  "EXP": {icon:"🚀", cls:"orange"},
+  "AIR BATT": {icon:"🔋", cls:"red"},
+  "AUTRE": {icon:"📦", cls:""}
+};
 
 let currentUserKey = "";
 let currentUserEmail = "";
 let selectedUserKey = "GLOBAL";
-let selectedMode = "";
+let selectedMode = "TOUS";
 let selectedExpMode = "";
 let selectedExpDate = "";
-let selectedFraisMode = "SEA";
-let editingArticleId = "";
 let allUsers = {};
 let allArticles = {};
 let listenersStarted = false;
+let fraisType = "SEA";
+let editingArticleId = null;
+let showArchives = false;
 
 function safeKey(email){
   return email.replaceAll(".", "_").replaceAll("@", "_");
@@ -335,15 +734,24 @@ function formatAr(value){
 }
 
 function getSeaPricePerCbm(){
-  let prix = parseFloat(document.getElementById("prixCBM").value)||0;
-  let usd = parseFloat(document.getElementById("usd").value)||0;
+  let prix = parseFloat(localStorage.getItem("kiah_prixCBM") || "360")||0;
+  let usd = parseFloat(localStorage.getItem("kiah_usd") || "4750")||0;
   return prix * usd;
 }
 
 function getKgPrice(mode){
-  if(mode === "EXP") return parseFloat(document.getElementById("prixKgExp").value)||0;
-  if(mode === "AIR BATT") return parseFloat(document.getElementById("prixKgAirBatt").value)||0;
-  return parseFloat(document.getElementById("prixKg").value)||0;
+  if(mode === "EXP") return parseFloat(localStorage.getItem("kiah_prixKgExp") || "80000")||0;
+  if(mode === "AIR BATT") return parseFloat(localStorage.getItem("kiah_prixKgAirBatt") || "120000")||0;
+  return parseFloat(localStorage.getItem("kiah_prixKg") || "69000")||0;
+}
+
+function modeBadge(mode){
+  let cls = "";
+  if(mode === "AIR") cls="air";
+  if(mode === "EXP") cls="exp";
+  if(mode === "AIR BATT") cls="batt";
+  if(mode === "AUTRE") cls="autre";
+  return `<span class="badge ${cls}">${mode || ""}</span>`;
 }
 
 window.login = function(){
@@ -380,6 +788,7 @@ onAuthStateChanged(auth, async (user)=>{
       listenUsers();
       listenArticles();
     }
+    renderFraisInputs();
   }else{
     document.getElementById("app").style.display="none";
     document.getElementById("loginScreen").style.display="flex";
@@ -395,11 +804,17 @@ function listenUsers(){
 function listenArticles(){
   onValue(ref(db,"articles"), snap=>{
     allArticles = snap.val() || {};
-    renderModeButtons();
-    renderArticles();
-    renderExpeditionModeButtons();
-    renderExpeditions();
+    renderAll();
   });
+}
+
+function renderAll(){
+  renderHome();
+  renderModeButtons();
+  renderArticleCategoryCards();
+  renderArticles();
+  renderExpeditionModeButtons();
+  renderExpeditions();
 }
 
 window.changeUser = function(){
@@ -422,15 +837,11 @@ window.changeUser = function(){
   selectedUserKey = keys[index];
   document.getElementById("currentUserLabel").innerText = labels[index];
 
-  selectedMode = "";
+  selectedMode = "TOUS";
   selectedExpMode = "";
   selectedExpDate = "";
-  editingArticleId = "";
 
-  renderModeButtons();
-  renderArticles();
-  renderExpeditionModeButtons();
-  renderExpeditions();
+  renderAll();
 }
 
 function getVisibleArticles(){
@@ -449,222 +860,326 @@ function getVisibleArticles(){
   return result;
 }
 
-/* FRAIS */
-window.selectFraisMode = function(mode){
-  selectedFraisMode = mode;
-  const map = {
-    "SEA":"calcSeaBox",
-    "AIR":"calcAirBox",
-    "EXP":"calcExpBox",
-    "AIR BATT":"calcAirBattBox"
-  };
-  Object.values(map).forEach(id=>document.getElementById(id).style.display="none");
-  document.getElementById(map[mode]).style.display="block";
-
-  document.querySelectorAll(".frais-buttons button").forEach(b=>b.classList.remove("active"));
-  if(mode === "SEA") document.getElementById("btnFraisSEA").classList.add("active");
-  if(mode === "AIR") document.getElementById("btnFraisAIR").classList.add("active");
-  if(mode === "EXP") document.getElementById("btnFraisEXP").classList.add("active");
-  if(mode === "AIR BATT") document.getElementById("btnFraisAIRBATT").classList.add("active");
-  calcAll();
+function activeArticles(){
+  return getVisibleArticles().filter(a => showArchives ? a.archived : !a.archived);
 }
 
-window.calcAll = function(){
-  calcSea();
-  calcAir();
-  calcExp();
-  calcAirBatt();
+/* HOME */
+function renderHome(){
+  let articles = getVisibleArticles();
+  let active = articles.filter(a=>!a.archived);
+  let shipped = active.filter(a=>(a.expedie||"").trim());
+  let waiting = active.length - shipped.length;
+
+  let estimated = 0;
+  active.forEach(a=>{
+    if(a.mode === "SEA") estimated += (parseFloat(a.expCbm)||0) * getSeaPricePerCbm();
+    if(WEIGHT_MODES.includes(a.mode)) estimated += (parseFloat(a.expKg)||0) * getKgPrice(a.mode);
+  });
+
+  document.getElementById("homeStats").innerHTML = `
+    <div class="stat-card cyan"><span>Total articles</span><strong>${active.length}</strong><small>Actifs</small></div>
+    <div class="stat-card violet"><span>Expédiés</span><strong>${shipped.length}</strong><small>Avec date expédition</small></div>
+    <div class="stat-card orange"><span>En attente</span><strong>${waiting}</strong><small>Pas encore expédiés</small></div>
+    <div class="stat-card green"><span>Montant estimé</span><strong style="font-size:22px">${formatAr(estimated)}</strong><small>Selon CBM/Kg saisis</small></div>
+  `;
+
+  let box = document.getElementById("homeTypeGrid");
+  box.innerHTML = "";
+  MODES.forEach(mode=>{
+    let list = active.filter(a=>a.mode===mode);
+    let shippedCount = list.filter(a=>(a.expedie||"").trim()).length;
+    let cls = MODE_INFO[mode].cls;
+    box.innerHTML += `
+      <div class="category-card ${cls}" onclick="openArticlesMode('${mode}')">
+        <div style="font-size:28px">${MODE_INFO[mode].icon}</div>
+        <b>${mode}</b>
+        <div class="big">${list.length}</div>
+        <div class="count">${shippedCount} expédiés • ${list.length-shippedCount} attente</div>
+      </div>
+    `;
+  });
+}
+
+/* FRAIS */
+window.selectFraisType = function(type){
+  fraisType = type;
+  renderFraisInputs();
+}
+
+function setLocal(id,val){ localStorage.setItem(id,val); }
+
+function renderFraisInputs(){
+  ["SEA","AIR","EXP","AIR BATT"].forEach(t=>{
+    let el = document.getElementById("type"+t);
+    if(el) el.classList.toggle("active", fraisType===t);
+  });
+
+  let box = document.getElementById("fraisInputs");
+  if(!box) return;
+
+  if(fraisType === "SEA"){
+    box.innerHTML = `
+      <h2>Calcul SEA</h2>
+      <label>CBM</label>
+      <input id="cbm" type="number" placeholder="CBM" oninput="calcSea()">
+      <label>Prix CBM en dollar</label>
+      <input id="prixCBM" type="number" value="${localStorage.getItem("kiah_prixCBM") || "360"}" oninput="setLocal('kiah_prixCBM',this.value); calcSea(); renderAll();">
+      <label>Dollar en Ariary</label>
+      <input id="usd" type="number" value="${localStorage.getItem("kiah_usd") || "4750"}" oninput="setLocal('kiah_usd',this.value); calcSea(); renderAll();">
+      <div class="result" id="resultSea">0 Ar</div>
+    `;
+  }else{
+    let key = fraisType === "AIR" ? "kiah_prixKg" : fraisType === "EXP" ? "kiah_prixKgExp" : "kiah_prixKgAirBatt";
+    let def = fraisType === "AIR" ? "69000" : fraisType === "EXP" ? "80000" : "120000";
+    box.innerHTML = `
+      <h2>Calcul ${fraisType}</h2>
+      <label>Poids Kg</label>
+      <input id="kgCalc" type="number" placeholder="Poids Kg" oninput="calcKgMode()">
+      <label>Prix Kg ${fraisType}</label>
+      <input id="prixKgCalc" type="number" value="${localStorage.getItem(key) || def}" oninput="setLocal('${key}',this.value); calcKgMode(); renderAll();">
+      <div class="result" id="resultKgCalc">0 Ar</div>
+    `;
+  }
+}
+
+window.setLocal = setLocal;
+
+window.calcSea = function(){
+  let cbm = parseFloat(document.getElementById("cbm")?.value)||0;
+  let prix = parseFloat(document.getElementById("prixCBM")?.value)||0;
+  let usd = parseFloat(document.getElementById("usd")?.value)||0;
+  document.getElementById("resultSea").innerText = formatAr(cbm*prix*usd);
+}
+
+window.calcKgMode = function(){
+  let kg = parseFloat(document.getElementById("kgCalc")?.value)||0;
+  let prix = parseFloat(document.getElementById("prixKgCalc")?.value)||0;
+  document.getElementById("resultKgCalc").innerText = formatAr(kg*prix);
 }
 
 /* ARTICLES */
-function renderModeButtons(){
-  let articles = getVisibleArticles();
-  let counts = {};
+window.openAddArticle = function(){
+  editingArticleId = null;
+  document.getElementById("modalTitle").innerText = "Ajouter un article";
+  document.getElementById("modalRef").value = "";
+  document.getElementById("modalName").value = "";
+  document.getElementById("modalMode").value = selectedMode !== "TOUS" ? selectedMode : "SEA";
+  document.getElementById("modalArchived").value = "active";
+  document.getElementById("modalAchat").value = "";
+  document.getElementById("modalDepot").value = "";
+  document.getElementById("modalExpedie").value = "";
+  document.getElementById("modalCbm").value = "";
+  document.getElementById("modalKg").value = "";
+  document.getElementById("modalNote").value = "";
+  document.getElementById("modalDeleteBtn").style.display = "none";
+  adjustModalFields();
+  document.getElementById("articleModal").classList.add("show");
+}
 
-  articles.forEach(a=>{
-    counts[a.mode] = (counts[a.mode] || 0) + 1;
-  });
+window.openEditArticle = function(id){
+  let item = allArticles[id];
+  if(!item) return;
 
-  let box = document.getElementById("modeButtons");
+  editingArticleId = id;
+  document.getElementById("modalTitle").innerText = "Voir / Modifier";
+  document.getElementById("modalRef").value = item.ref || "";
+  document.getElementById("modalName").value = item.name || "";
+  document.getElementById("modalMode").value = item.mode || "SEA";
+  document.getElementById("modalArchived").value = item.archived ? "archived" : "active";
+  document.getElementById("modalAchat").value = item.achat || "";
+  document.getElementById("modalDepot").value = item.depot || "";
+  document.getElementById("modalExpedie").value = item.expedie || "";
+  document.getElementById("modalCbm").value = item.expCbm || "";
+  document.getElementById("modalKg").value = item.expKg || "";
+  document.getElementById("modalNote").value = item.note || "";
+  document.getElementById("modalDeleteBtn").style.display = "block";
+  adjustModalFields();
+  document.getElementById("articleModal").classList.add("show");
+}
+
+window.closeArticleModal = function(){
+  document.getElementById("articleModal").classList.remove("show");
+}
+
+document.getElementById("modalMode").addEventListener("change", adjustModalFields);
+
+function adjustModalFields(){
+  let mode = document.getElementById("modalMode").value;
+  document.getElementById("modalCbmBox").style.display = mode==="SEA" ? "block" : "none";
+  document.getElementById("modalKgBox").style.display = WEIGHT_MODES.includes(mode) ? "block" : "none";
+}
+
+window.saveArticleModal = function(){
+  let refVal = document.getElementById("modalRef").value.trim();
+  if(!refVal){ alert("Référence obligatoire"); return; }
+
+  let data = {
+    ref: refVal,
+    name: document.getElementById("modalName").value.trim(),
+    mode: document.getElementById("modalMode").value,
+    achat: document.getElementById("modalAchat").value.trim(),
+    depot: document.getElementById("modalDepot").value.trim(),
+    expedie: document.getElementById("modalExpedie").value.trim(),
+    expCbm: document.getElementById("modalCbm").value,
+    expKg: document.getElementById("modalKg").value,
+    note: document.getElementById("modalNote").value.trim(),
+    archived: document.getElementById("modalArchived").value === "archived"
+  };
+
+  if(editingArticleId){
+    update(ref(db,`articles/${editingArticleId}`), data);
+  }else{
+    push(ref(db,"articles"),{
+      ...data,
+      userKey: currentUserKey,
+      createdBy: currentUserEmail,
+      createdAt: Date.now()
+    });
+    selectedMode = data.mode;
+  }
+  closeArticleModal();
+}
+
+window.deleteArticleFromModal = function(){
+  if(!editingArticleId) return;
+  if(confirm("Supprimer cet article définitivement ?")){
+    remove(ref(db,`articles/${editingArticleId}`));
+    closeArticleModal();
+  }
+}
+
+function renderArticleCategoryCards(){
+  let articles = activeArticles();
+  let box = document.getElementById("articleCategoryCards");
+  if(!box) return;
   box.innerHTML = "";
 
-  MODES.forEach(mode=>{
-    if(counts[mode]){
-      if(!selectedMode) selectedMode = mode;
-      box.innerHTML += `<button class="${selectedMode===mode?'active':''}" onclick="selectMode('${mode}')">${mode} (${counts[mode]})</button>`;
-    }
-  });
+  let allCount = articles.length;
+  box.innerHTML += `
+    <div class="category-card ${selectedMode==="TOUS"?'active':''}" onclick="selectMode('TOUS')">
+      <div style="font-size:28px">🧭</div><b>TOUS</b><div class="big">${allCount}</div><div class="count">${showArchives?'Archives':'Actifs'}</div>
+    </div>
+  `;
 
-  if(selectedMode && !counts[selectedMode]){
-    selectedMode = Object.keys(counts)[0] || "";
-  }
+  MODES.forEach(mode=>{
+    let count = articles.filter(a=>a.mode===mode).length;
+    let cls = MODE_INFO[mode].cls;
+    box.innerHTML += `
+      <div class="category-card ${cls} ${selectedMode===mode?'active':''}" onclick="selectMode('${mode}')">
+        <div style="font-size:28px">${MODE_INFO[mode].icon}</div><b>${mode}</b><div class="big">${count}</div><div class="count">article(s)</div>
+      </div>
+    `;
+  });
+}
+
+function renderModeButtons(){
+  let articles = activeArticles();
+  let counts = {};
+  articles.forEach(a=> counts[a.mode] = (counts[a.mode] || 0) + 1);
+
+  let box = document.getElementById("modeButtons");
+  if(!box) return;
+  box.innerHTML = `<button class="chip ${selectedMode==="TOUS"?'active':''}" onclick="selectMode('TOUS')">Tous (${articles.length})</button>`;
+
+  MODES.forEach(mode=>{
+    box.innerHTML += `<button class="chip ${selectedMode===mode?'active':''}" onclick="selectMode('${mode}')">${mode} (${counts[mode]||0})</button>`;
+  });
 }
 
 window.selectMode = function(mode){
   selectedMode = mode;
-  editingArticleId = "";
   renderModeButtons();
+  renderArticleCategoryCards();
   renderArticles();
 }
 
-window.addItem = function(){
-  let refVal = document.getElementById("refInput").value.trim();
-  let nameVal = document.getElementById("nameInput").value.trim();
-  let modeVal = document.getElementById("modeInput").value;
+window.openArticlesMode = function(mode){
+  selectedMode = mode;
+  showArchives = false;
+  openTabById("articles");
+}
 
-  if(!refVal) return;
+window.toggleArchiveView = function(){
+  showArchives = !showArchives;
+  document.getElementById("archiveToggle").innerText = showArchives ? "Articles actifs" : "Archives";
+  selectedMode = "TOUS";
+  renderAll();
+}
 
-  push(ref(db,"articles"),{
-    ref: refVal,
-    name: nameVal,
-    mode: modeVal,
-    achat: "",
-    depot: "",
-    expedie: "",
-    userKey: currentUserKey,
-    createdBy: currentUserEmail,
-    createdAt: Date.now()
-  });
-
-  document.getElementById("refInput").value = "";
-  document.getElementById("nameInput").value = "";
-  selectedMode = modeVal;
+window.clearSearch = function(){
+  document.getElementById("searchInput").value = "";
+  renderArticles();
 }
 
 window.renderArticles = function(){
-  let search = document.getElementById("searchInput").value.toLowerCase().trim();
-  let articles = getVisibleArticles();
+  let search = (document.getElementById("searchInput")?.value || "").toLowerCase().trim();
+  let articles = activeArticles();
 
-  if(selectedMode){
+  if(selectedMode && selectedMode !== "TOUS"){
     articles = articles.filter(a=>a.mode === selectedMode);
   }
 
   if(search){
     articles = articles.filter(a=>
       (a.ref || "").toLowerCase().includes(search) ||
-      (a.name || "").toLowerCase().includes(search)
+      (a.name || "").toLowerCase().includes(search) ||
+      (a.mode || "").toLowerCase().includes(search) ||
+      (a.achat || "").toLowerCase().includes(search) ||
+      (a.depot || "").toLowerCase().includes(search) ||
+      (a.expedie || "").toLowerCase().includes(search)
     );
   }
 
-  document.getElementById("listTitle").innerText = selectedMode ? `Liste ${selectedMode}` : "Liste articles";
-  document.getElementById("categoryTotal").innerText = selectedMode ? `Total ${selectedMode} : ${articles.length} article(s)` : "";
+  document.getElementById("listTitle").innerText = `${showArchives ? "Archives" : "Articles actifs"} ${selectedMode !== "TOUS" ? "- " + selectedMode : ""}`;
+  document.getElementById("categoryTotal").innerText = `Total affiché : ${articles.length} article(s)`;
 
   let box = document.getElementById("items");
   box.innerHTML = "";
 
   if(!articles.length){
-    box.innerHTML = `<div class="empty">Aucun article disponible</div>`;
+    box.innerHTML = `<div class="empty">Aucun article trouvé</div>`;
     return;
   }
 
   articles.forEach(item=>{
-    let isEditing = editingArticleId === item.id;
-    let editPanel = "";
-
-    if(isEditing){
-      editPanel = `
-        <div class="edit-panel">
-          <div class="grid-2">
-            <input id="editRef_${item.id}" value="${escapeHtml(item.ref || "")}" placeholder="Référence">
-            <input id="editName_${item.id}" value="${escapeHtml(item.name || "")}" placeholder="Nom article">
-          </div>
-          <select id="editMode_${item.id}">
-            ${MODES.map(m=>`<option ${item.mode===m?'selected':''}>${m}</option>`).join("")}
-          </select>
-          <div class="grid-2">
-            <input id="editAchat_${item.id}" value="${escapeHtml(item.achat || "")}" placeholder="Date achat">
-            <input id="editDepot_${item.id}" value="${escapeHtml(item.depot || "")}" placeholder="Date dépôt">
-          </div>
-          <input id="editExpedie_${item.id}" value="${escapeHtml(item.expedie || "")}" placeholder="Date expédié">
-          <div class="action-row">
-            <button class="save" onclick="saveArticleEdit('${item.id}')">Enregistrer</button>
-            <button class="cancel" onclick="cancelArticleEdit()">Fermer</button>
-          </div>
-        </div>
-      `;
+    let mode = item.mode || "AUTRE";
+    let icon = MODE_INFO[mode]?.icon || "📦";
+    let shipped = (item.expedie || "").trim();
+    let valueText = "";
+    if(mode === "SEA"){
+      let price = (parseFloat(item.expCbm)||0) * getSeaPricePerCbm();
+      if(item.expCbm) valueText = `${item.expCbm} CBM • ${formatAr(price)}`;
+    }else if(WEIGHT_MODES.includes(mode)){
+      let price = (parseFloat(item.expKg)||0) * getKgPrice(mode);
+      if(item.expKg) valueText = `${item.expKg} Kg • ${formatAr(price)}`;
     }
 
     box.innerHTML += `
       <div class="article compact">
-        <div class="article-head">
-          <div>
-            <div class="article-ref">${escapeHtml(item.ref || "")}</div>
-            <div class="article-name">${escapeHtml(item.name || "")}</div>
-            <div class="count">${escapeHtml(item.createdBy || "")}</div>
+        <div class="article-icon">${icon}</div>
+        <div>
+          <div class="article-ref">${item.ref || ""}</div>
+          <div class="article-name">${item.name || ""}</div>
+          <div class="article-meta">
+            ${modeBadge(mode)}
+            <span class="badge ${shipped?'':'exp'}">${shipped ? "Expédié : "+shipped : "En attente"}</span>
+            ${item.achat ? `<span class="badge autre">Achat : ${item.achat}</span>` : ""}
+            ${valueText ? `<span class="badge">${valueText}</span>` : ""}
           </div>
-          <div class="badge">${escapeHtml(item.mode || "")}</div>
+          <div class="count">${item.createdBy || ""}${item.note ? " • Note disponible" : ""}</div>
         </div>
-
-        <div class="status-line">
-          <span class="mini-status ${item.achat?'done':''}">Achat: ${escapeHtml(item.achat || "—")}</span>
-          <span class="mini-status ${item.depot?'done':''}">Dépôt: ${escapeHtml(item.depot || "—")}</span>
-          <span class="mini-status ${item.expedie?'done':''}">Expédié: ${escapeHtml(item.expedie || "—")}</span>
+        <div class="article-actions">
+          <button class="action-mini" onclick="openEditArticle('${item.id}')">Voir / Modifier ›</button>
         </div>
-
-        <div class="action-row">
-          <button class="edit-btn" onclick="startArticleEdit('${item.id}')">Modifier</button>
-          <button class="delete" onclick="deleteArticle('${item.id}')">Supprimer</button>
-        </div>
-        ${editPanel}
       </div>
     `;
   });
 }
 
-function escapeHtml(value){
-  return String(value)
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
-}
-
-window.startArticleEdit = function(id){
-  editingArticleId = id;
-  renderArticles();
-}
-
-window.cancelArticleEdit = function(){
-  editingArticleId = "";
-  renderArticles();
-}
-
-window.saveArticleEdit = function(id){
-  let refVal = document.getElementById(`editRef_${id}`).value.trim();
-  let nameVal = document.getElementById(`editName_${id}`).value.trim();
-  let modeVal = document.getElementById(`editMode_${id}`).value;
-  let achatVal = document.getElementById(`editAchat_${id}`).value.trim();
-  let depotVal = document.getElementById(`editDepot_${id}`).value.trim();
-  let expedieVal = document.getElementById(`editExpedie_${id}`).value.trim();
-
-  if(!refVal){
-    alert("La référence est obligatoire");
-    return;
-  }
-
-  update(ref(db,`articles/${id}`), {
-    ref: refVal,
-    name: nameVal,
-    mode: modeVal,
-    achat: achatVal,
-    depot: depotVal,
-    expedie: expedieVal
-  });
-
-  selectedMode = modeVal;
-  editingArticleId = "";
-}
-
-window.deleteArticle = function(id){
-  if(confirm("Supprimer cet article définitivement ?")){
-    remove(ref(db,`articles/${id}`));
-  }
-}
-
 /* EXPEDITIONS */
 function getShippedArticles(){
-  return getVisibleArticles().filter(a => (a.expedie || "").trim() !== "");
+  return getVisibleArticles().filter(a => !a.archived && (a.expedie || "").trim() !== "");
 }
 
 function renderExpeditionModeButtons(){
@@ -676,12 +1191,13 @@ function renderExpeditionModeButtons(){
   });
 
   let box = document.getElementById("expModeButtons");
+  if(!box) return;
   box.innerHTML = "";
 
   MODES.forEach(mode=>{
     if(counts[mode]){
       if(!selectedExpMode) selectedExpMode = mode;
-      box.innerHTML += `<button class="${selectedExpMode===mode?'active':''}" onclick="selectExpMode('${mode}')">${mode} (${counts[mode]})</button>`;
+      box.innerHTML += `<button class="${selectedExpMode===mode?'active':''}" onclick="selectExpMode('${mode}')">${MODE_INFO[mode].icon} ${mode} (${counts[mode]})</button>`;
     }
   });
 
@@ -712,9 +1228,10 @@ function renderExpeditions(){
   });
 
   let dateBox = document.getElementById("expDateButtons");
+  if(!dateBox) return;
   dateBox.innerHTML = "";
 
-  let dates = Object.keys(dateCounts);
+  let dates = Object.keys(dateCounts).sort().reverse();
 
   if(selectedExpDate && !dateCounts[selectedExpDate]){
     selectedExpDate = "";
@@ -725,7 +1242,7 @@ function renderExpeditions(){
   }
 
   dates.forEach(date=>{
-    dateBox.innerHTML += `<button class="${selectedExpDate===date?'active':''}" onclick="selectExpDate('${escapeForJs(date)}')">${escapeHtml(date)} (${dateCounts[date]})</button>`;
+    dateBox.innerHTML += `<button class="${selectedExpDate===date?'active':''}" onclick="selectExpDate('${date}')">${date} (${dateCounts[date]})</button>`;
   });
 
   if(selectedExpDate){
@@ -776,14 +1293,15 @@ function renderExpeditions(){
 
     box.innerHTML += `
       <div class="article">
-        <div class="article-head">
+        <div class="article compact">
+          <div class="article-icon">${MODE_INFO[mode]?.icon || "📦"}</div>
           <div>
-            <div class="article-ref">${escapeHtml(item.ref || "")}</div>
-            <div class="article-name">${escapeHtml(item.name || "")}</div>
-            <div class="count">Expédié : ${escapeHtml(item.expedie || "")}</div>
-            <div class="count">${escapeHtml(item.createdBy || "")}</div>
+            <div class="article-ref">${item.ref || ""}</div>
+            <div class="article-name">${item.name || ""}</div>
+            <div class="article-meta">${modeBadge(mode)}<span class="badge">Expédié : ${item.expedie || ""}</span></div>
+            <div class="count">${item.createdBy || ""}</div>
           </div>
-          <div class="badge">${escapeHtml(mode)}</div>
+          <div class="article-actions"><button class="action-mini" onclick="openEditArticle('${item.id}')">Modifier</button></div>
         </div>
         ${mode === "SEA" || WEIGHT_MODES.includes(mode) ? `
           <div class="ship-box">
@@ -823,10 +1341,6 @@ function renderExpeditions(){
 
   document.getElementById("deleteAllExpBtn").style.display = "block";
   document.getElementById("downloadExpBtn").style.display = "block";
-}
-
-function escapeForJs(value){
-  return String(value).replaceAll("\\","\\\\").replaceAll("'","\\'");
 }
 
 window.updateShippingValue = function(id,field,value){
@@ -887,35 +1401,17 @@ window.openTab = function(id,btn){
   document.querySelectorAll(".tabs button").forEach(b=>b.classList.remove("active"));
   btn.classList.add("active");
 
+  if(id === "frais") renderFraisInputs();
   if(id === "expeditions"){
     renderExpeditionModeButtons();
     renderExpeditions();
   }
+  window.scrollTo({top:0,behavior:"smooth"});
 }
 
-window.calcSea = function(){
-  let cbm = parseFloat(document.getElementById("cbm").value)||0;
-  let prix = parseFloat(document.getElementById("prixCBM").value)||0;
-  let usd = parseFloat(document.getElementById("usd").value)||0;
-  document.getElementById("resultSea").innerText = formatAr(cbm*prix*usd);
-}
-
-window.calcAir = function(){
-  let kg = parseFloat(document.getElementById("kg").value)||0;
-  let prix = parseFloat(document.getElementById("prixKg").value)||0;
-  document.getElementById("resultAir").innerText = formatAr(kg*prix);
-}
-
-window.calcExp = function(){
-  let kg = parseFloat(document.getElementById("kgExp").value)||0;
-  let prix = parseFloat(document.getElementById("prixKgExp").value)||0;
-  document.getElementById("resultExp").innerText = formatAr(kg*prix);
-}
-
-window.calcAirBatt = function(){
-  let kg = parseFloat(document.getElementById("kgAirBatt").value)||0;
-  let prix = parseFloat(document.getElementById("prixKgAirBatt").value)||0;
-  document.getElementById("resultAirBatt").innerText = formatAr(kg*prix);
+window.openTabById = function(id){
+  let btn = document.querySelector(`.tabs button[data-tab="${id}"]`);
+  if(btn) openTab(id,btn);
 }
 </script>
 
