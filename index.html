@@ -9,51 +9,165 @@
 
 <style>
 *{box-sizing:border-box}
-body{margin:0;font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif;background:#f3f5fb;color:#111827}
-.login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:25px;background:linear-gradient(160deg,#2445a8,#6d8cff)}
-.login-card{background:white;width:100%;max-width:390px;border-radius:28px;padding:28px}
-.login-card h1{margin:0 0 25px;font-size:30px;color:#2445a8}
-input,select{width:100%;padding:15px;border:1px solid #d1d5db;border-radius:16px;margin:7px 0;background:white;font-size:16px}
-button{border:none;border-radius:16px;padding:13px 16px;font-weight:700;font-size:16px}
-.primary{width:100%;background:#2445a8;color:white;margin-top:8px}
-.error{color:red;margin-top:10px;font-size:13px}
-.app{display:none;padding-bottom:120px}
-.top{background:#2445a8;color:white;padding:18px 16px 24px;border-bottom-left-radius:28px;border-bottom-right-radius:28px}
+:root{
+  --bg:#050816;
+  --bg2:#0b1028;
+  --card:rgba(255,255,255,.08);
+  --card2:rgba(255,255,255,.12);
+  --line:rgba(255,255,255,.14);
+  --text:#f8fafc;
+  --muted:#a7b0c5;
+  --blue:#38bdf8;
+  --violet:#8b5cf6;
+  --green:#22c55e;
+  --red:#ef4444;
+  --yellow:#facc15;
+}
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  background:
+    radial-gradient(circle at top left,rgba(56,189,248,.25),transparent 32%),
+    radial-gradient(circle at top right,rgba(139,92,246,.25),transparent 34%),
+    linear-gradient(160deg,var(--bg),var(--bg2));
+  color:var(--text);
+  min-height:100vh;
+}
+button,input,select{font-family:inherit}
+input,select{
+  width:100%;
+  padding:15px;
+  border:1px solid var(--line);
+  border-radius:18px;
+  margin:7px 0;
+  background:rgba(255,255,255,.08);
+  color:var(--text);
+  font-size:16px;
+  outline:none;
+}
+select option{background:#111827;color:white}
+input::placeholder{color:#7f8aa3}
+input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(56,189,248,.16)}
+button{
+  border:none;
+  border-radius:18px;
+  padding:13px 16px;
+  font-weight:800;
+  font-size:15px;
+  cursor:pointer;
+}
+.login{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:25px;
+}
+.login-card{
+  background:rgba(255,255,255,.1);
+  backdrop-filter:blur(18px);
+  border:1px solid var(--line);
+  width:100%;
+  max-width:390px;
+  border-radius:30px;
+  padding:28px;
+  box-shadow:0 25px 80px rgba(0,0,0,.32);
+}
+.login-card h1{margin:0 0 25px;font-size:32px;background:linear-gradient(90deg,var(--blue),var(--violet));-webkit-background-clip:text;color:transparent}
+.primary{
+  width:100%;
+  background:linear-gradient(135deg,var(--blue),var(--violet));
+  color:white;
+  margin-top:8px;
+  box-shadow:0 12px 28px rgba(56,189,248,.18);
+}
+.error{color:#fca5a5;margin-top:10px;font-size:13px}
+.app{display:none;padding-bottom:112px}
+.top{
+  padding:18px 16px 24px;
+  background:rgba(255,255,255,.06);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--line);
+  border-bottom-left-radius:30px;
+  border-bottom-right-radius:30px;
+}
 .top-row{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.top h1{font-size:25px;margin:0}
-.top small{color:#dbe3ff}
-.user-btn{background:white;color:#2445a8;padding:9px 12px;border-radius:14px;font-size:13px}
-.container{padding:16px}
-.card{background:white;border-radius:24px;padding:18px;margin-bottom:15px;box-shadow:0 8px 24px rgba(15,23,42,.06)}
+.top h1{font-size:26px;margin:0;background:linear-gradient(90deg,var(--blue),#fff,var(--violet));-webkit-background-clip:text;color:transparent}
+.top small{color:var(--muted)}
+.user-btn{background:rgba(255,255,255,.12);color:white;border:1px solid var(--line);padding:10px 12px;border-radius:16px;font-size:13px}
+.container{padding:16px;max-width:850px;margin:auto}
+.card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:28px;
+  padding:18px;
+  margin-bottom:15px;
+  box-shadow:0 18px 55px rgba(0,0,0,.22);
+  backdrop-filter:blur(16px);
+}
 .card h2{margin:0 0 12px;font-size:22px}
-.result{font-size:28px;font-weight:900;color:#3867e8;margin-top:10px}
-.tabs{position:fixed;bottom:12px;left:8px;right:8px;display:flex;gap:6px;z-index:20;overflow-x:auto;padding-bottom:2px}
-.tabs button{flex:1;background:#e8ecf8;color:#475569;padding:12px 5px;font-size:13px;min-width:72px}
-.tabs button.active{background:#4f74e8;color:white}
-.logout{position:fixed;right:14px;bottom:82px;background:#ef4444;color:white;z-index:30}
+.result{
+  font-size:30px;
+  font-weight:950;
+  margin-top:12px;
+  color:white;
+  text-shadow:0 0 22px rgba(56,189,248,.45);
+}
+.tabs{
+  position:fixed;
+  bottom:12px;
+  left:10px;
+  right:10px;
+  display:flex;
+  gap:8px;
+  z-index:20;
+  padding:8px;
+  background:rgba(5,8,22,.72);
+  backdrop-filter:blur(18px);
+  border:1px solid var(--line);
+  border-radius:24px;
+}
+.tabs button{flex:1;background:rgba(255,255,255,.08);color:var(--muted);padding:13px 6px;font-size:13px}
+.tabs button.active{background:linear-gradient(135deg,var(--blue),var(--violet));color:white}
+.logout{position:fixed;right:14px;bottom:88px;background:rgba(239,68,68,.92);color:white;z-index:30;box-shadow:0 12px 30px rgba(239,68,68,.2)}
 .section{display:none}
 .section.active{display:block}
-.mode-buttons,.date-buttons{display:flex;gap:8px;overflow-x:auto;padding:6px 0 12px}
-.mode-buttons button,.date-buttons button{white-space:nowrap;background:#eef2ff;color:#2445a8}
-.mode-buttons button.active,.date-buttons button.active{background:#2445a8;color:white}
-.article{border:1px solid #eef0f5;border-radius:22px;padding:14px;margin-top:12px;background:#fff}
-.article-head{display:flex;justify-content:space-between;gap:10px}
-.article-ref{font-weight:900;font-size:17px}
-.article-name{color:#374151;margin-top:4px}
-.badge{background:#eef2ff;color:#2445a8;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:800;height:max-content}
-.status-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-top:10px}
-.status{background:#f3f4f6;color:#374151;padding:9px 6px;border-radius:13px;font-size:12px}
-.status.done{background:#facc15;color:#3f2f00}
-.delete{background:#ef4444;color:white;width:100%;margin-top:10px}
+.mode-buttons,.date-buttons,.frais-buttons{display:flex;gap:8px;overflow-x:auto;padding:6px 0 12px}
+.mode-buttons button,.date-buttons button,.frais-buttons button{white-space:nowrap;background:rgba(255,255,255,.08);color:#dbeafe;border:1px solid var(--line)}
+.mode-buttons button.active,.date-buttons button.active,.frais-buttons button.active{background:linear-gradient(135deg,var(--blue),var(--violet));color:white}
+.article{
+  border:1px solid var(--line);
+  border-radius:22px;
+  padding:14px;
+  margin-top:12px;
+  background:rgba(255,255,255,.07);
+}
+.article.compact{padding:12px}
+.article-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.article-ref{font-weight:950;font-size:17px;color:white}
+.article-name{color:#dbeafe;margin-top:4px}
+.badge{background:rgba(56,189,248,.15);color:#bae6fd;border:1px solid rgba(56,189,248,.28);border-radius:999px;padding:5px 9px;font-size:12px;font-weight:900;height:max-content;white-space:nowrap}
+.count{color:var(--muted);font-size:13px;margin-top:4px}
+.status-line{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.mini-status{background:rgba(255,255,255,.08);color:#cbd5e1;padding:7px 9px;border-radius:999px;font-size:12px;font-weight:800}
+.mini-status.done{background:rgba(250,204,21,.18);color:#fde68a;border:1px solid rgba(250,204,21,.25)}
+.action-row{display:flex;gap:8px;margin-top:10px}
+.action-row button{flex:1;font-size:13px;padding:11px 10px}
+.edit-btn{background:rgba(56,189,248,.18);color:#bae6fd;border:1px solid rgba(56,189,248,.3)}
+.delete{background:rgba(239,68,68,.88);color:white;width:100%}
+.save{background:linear-gradient(135deg,var(--green),#16a34a);color:white;width:100%}
+.cancel{background:rgba(255,255,255,.1);color:white;width:100%;border:1px solid var(--line)}
 .delete-all{background:#b91c1c;color:white;width:100%;margin-top:18px}
-.count{color:#6b7280;font-size:14px;margin-bottom:6px}
-.download{background:#16a34a;color:white;margin-top:14px;width:100%}
-.empty{color:#6b7280;text-align:center;padding:20px}
-.ship-box{margin-top:12px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:18px;padding:12px}
+.download{background:linear-gradient(135deg,#22c55e,#16a34a);color:white;margin-top:14px;width:100%}
+.empty{color:var(--muted);text-align:center;padding:22px}
+.ship-box{margin-top:12px;background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:18px;padding:12px}
 .ship-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:center}
 .ship-row input{margin:0;padding:12px;border-radius:14px}
-.ship-result{font-weight:900;color:#2445a8;text-align:right}
-.summary-box{margin-top:16px;background:#eef2ff;color:#1e3a8a;border-radius:18px;padding:14px;font-weight:900;line-height:1.7}
+.ship-result{font-weight:950;color:#bae6fd;text-align:right}
+.summary-box{margin-top:16px;background:rgba(56,189,248,.12);color:#e0f2fe;border:1px solid rgba(56,189,248,.22);border-radius:20px;padding:14px;font-weight:950;line-height:1.7}
+.edit-panel{margin-top:12px;padding:12px;border-radius:20px;background:rgba(0,0,0,.18);border:1px solid var(--line)}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:520px){.grid-2{grid-template-columns:1fr}.ship-row{grid-template-columns:1fr}.ship-result{text-align:left}.top h1{font-size:23px}}
 </style>
 </head>
 
@@ -83,40 +197,40 @@ button{border:none;border-radius:16px;padding:13px 16px;font-weight:700;font-siz
 
   <div class="container">
 
-    <div id="sea" class="section active">
+    <div id="frais" class="section active">
       <div class="card">
-        <h2>Calcul SEA</h2>
-        <input id="cbm" type="number" placeholder="CBM" oninput="calcSea(); renderExpeditions();">
-        <input id="prixCBM" type="number" value="360" placeholder="Prix CBM en dollar" oninput="calcSea(); renderExpeditions();">
-        <input id="usd" type="number" value="4750" placeholder="Dollar en Ariary" oninput="calcSea(); renderExpeditions();">
-        <div class="result" id="resultSea">0 Ar</div>
-      </div>
-    </div>
+        <h2>Frais</h2>
+        <div class="frais-buttons">
+          <button id="btnFraisSEA" class="active" onclick="selectFraisMode('SEA')">SEA</button>
+          <button id="btnFraisAIR" onclick="selectFraisMode('AIR')">AIR</button>
+          <button id="btnFraisEXP" onclick="selectFraisMode('EXP')">EXP</button>
+          <button id="btnFraisAIRBATT" onclick="selectFraisMode('AIR BATT')">AIR BATT</button>
+        </div>
 
-    <div id="air" class="section">
-      <div class="card">
-        <h2>Calcul AIR</h2>
-        <input id="kg" type="number" placeholder="Poids Kg" oninput="calcAir(); renderExpeditions();">
-        <input id="prixKg" type="number" value="69000" placeholder="Prix Kg" oninput="calcAir(); renderExpeditions();">
-        <div class="result" id="resultAir">0 Ar</div>
-      </div>
-    </div>
+        <div id="calcSeaBox">
+          <input id="cbm" type="number" placeholder="CBM" oninput="calcAll(); renderExpeditions();">
+          <input id="prixCBM" type="number" value="360" placeholder="Prix CBM en dollar" oninput="calcAll(); renderExpeditions();">
+          <input id="usd" type="number" value="4750" placeholder="Dollar en Ariary" oninput="calcAll(); renderExpeditions();">
+          <div class="result" id="resultSea">0 Ar</div>
+        </div>
 
-    <div id="exp" class="section">
-      <div class="card">
-        <h2>Calcul EXP</h2>
-        <input id="kgExp" type="number" placeholder="Poids Kg" oninput="calcExp(); renderExpeditions();">
-        <input id="prixKgExp" type="number" value="80000" placeholder="Prix Kg EXP" oninput="calcExp(); renderExpeditions();">
-        <div class="result" id="resultExp">0 Ar</div>
-      </div>
-    </div>
+        <div id="calcAirBox" style="display:none">
+          <input id="kg" type="number" placeholder="Poids Kg" oninput="calcAll(); renderExpeditions();">
+          <input id="prixKg" type="number" value="69000" placeholder="Prix Kg AIR" oninput="calcAll(); renderExpeditions();">
+          <div class="result" id="resultAir">0 Ar</div>
+        </div>
 
-    <div id="airbatt" class="section">
-      <div class="card">
-        <h2>Calcul AIR BATT</h2>
-        <input id="kgAirBatt" type="number" placeholder="Poids Kg" oninput="calcAirBatt(); renderExpeditions();">
-        <input id="prixKgAirBatt" type="number" value="120000" placeholder="Prix Kg AIR BATT" oninput="calcAirBatt(); renderExpeditions();">
-        <div class="result" id="resultAirBatt">0 Ar</div>
+        <div id="calcExpBox" style="display:none">
+          <input id="kgExp" type="number" placeholder="Poids Kg" oninput="calcAll(); renderExpeditions();">
+          <input id="prixKgExp" type="number" value="80000" placeholder="Prix Kg EXP" oninput="calcAll(); renderExpeditions();">
+          <div class="result" id="resultExp">0 Ar</div>
+        </div>
+
+        <div id="calcAirBattBox" style="display:none">
+          <input id="kgAirBatt" type="number" placeholder="Poids Kg" oninput="calcAll(); renderExpeditions();">
+          <input id="prixKgAirBatt" type="number" value="120000" placeholder="Prix Kg AIR BATT" oninput="calcAll(); renderExpeditions();">
+          <div class="result" id="resultAirBatt">0 Ar</div>
+        </div>
       </div>
     </div>
 
@@ -172,10 +286,7 @@ button{border:none;border-radius:16px;padding:13px 16px;font-weight:700;font-siz
   <button class="logout" onclick="logout()">Déconnexion</button>
 
   <div class="tabs">
-    <button class="active" onclick="openTab('sea',this)">SEA</button>
-    <button onclick="openTab('air',this)">AIR</button>
-    <button onclick="openTab('exp',this)">EXP</button>
-    <button onclick="openTab('airbatt',this)">AIR BATT</button>
+    <button class="active" onclick="openTab('frais',this)">Frais</button>
     <button onclick="openTab('list',this)">Articles</button>
     <button onclick="openTab('expeditions',this)">Expéditions</button>
   </div>
@@ -209,6 +320,8 @@ let selectedUserKey = "GLOBAL";
 let selectedMode = "";
 let selectedExpMode = "";
 let selectedExpDate = "";
+let selectedFraisMode = "SEA";
+let editingArticleId = "";
 let allUsers = {};
 let allArticles = {};
 let listenersStarted = false;
@@ -312,6 +425,7 @@ window.changeUser = function(){
   selectedMode = "";
   selectedExpMode = "";
   selectedExpDate = "";
+  editingArticleId = "";
 
   renderModeButtons();
   renderArticles();
@@ -331,7 +445,35 @@ function getVisibleArticles(){
     }
   });
 
+  result.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
   return result;
+}
+
+/* FRAIS */
+window.selectFraisMode = function(mode){
+  selectedFraisMode = mode;
+  const map = {
+    "SEA":"calcSeaBox",
+    "AIR":"calcAirBox",
+    "EXP":"calcExpBox",
+    "AIR BATT":"calcAirBattBox"
+  };
+  Object.values(map).forEach(id=>document.getElementById(id).style.display="none");
+  document.getElementById(map[mode]).style.display="block";
+
+  document.querySelectorAll(".frais-buttons button").forEach(b=>b.classList.remove("active"));
+  if(mode === "SEA") document.getElementById("btnFraisSEA").classList.add("active");
+  if(mode === "AIR") document.getElementById("btnFraisAIR").classList.add("active");
+  if(mode === "EXP") document.getElementById("btnFraisEXP").classList.add("active");
+  if(mode === "AIR BATT") document.getElementById("btnFraisAIRBATT").classList.add("active");
+  calcAll();
+}
+
+window.calcAll = function(){
+  calcSea();
+  calcAir();
+  calcExp();
+  calcAirBatt();
 }
 
 /* ARTICLES */
@@ -360,6 +502,7 @@ function renderModeButtons(){
 
 window.selectMode = function(mode){
   selectedMode = mode;
+  editingArticleId = "";
   renderModeButtons();
   renderArticles();
 }
@@ -409,35 +552,108 @@ window.renderArticles = function(){
   let box = document.getElementById("items");
   box.innerHTML = "";
 
+  if(!articles.length){
+    box.innerHTML = `<div class="empty">Aucun article disponible</div>`;
+    return;
+  }
+
   articles.forEach(item=>{
+    let isEditing = editingArticleId === item.id;
+    let editPanel = "";
+
+    if(isEditing){
+      editPanel = `
+        <div class="edit-panel">
+          <div class="grid-2">
+            <input id="editRef_${item.id}" value="${escapeHtml(item.ref || "")}" placeholder="Référence">
+            <input id="editName_${item.id}" value="${escapeHtml(item.name || "")}" placeholder="Nom article">
+          </div>
+          <select id="editMode_${item.id}">
+            ${MODES.map(m=>`<option ${item.mode===m?'selected':''}>${m}</option>`).join("")}
+          </select>
+          <div class="grid-2">
+            <input id="editAchat_${item.id}" value="${escapeHtml(item.achat || "")}" placeholder="Date achat">
+            <input id="editDepot_${item.id}" value="${escapeHtml(item.depot || "")}" placeholder="Date dépôt">
+          </div>
+          <input id="editExpedie_${item.id}" value="${escapeHtml(item.expedie || "")}" placeholder="Date expédié">
+          <div class="action-row">
+            <button class="save" onclick="saveArticleEdit('${item.id}')">Enregistrer</button>
+            <button class="cancel" onclick="cancelArticleEdit()">Fermer</button>
+          </div>
+        </div>
+      `;
+    }
+
     box.innerHTML += `
-      <div class="article">
+      <div class="article compact">
         <div class="article-head">
           <div>
-            <div class="article-ref">${item.ref || ""}</div>
-            <div class="article-name">${item.name || ""}</div>
-            <div class="count">${item.createdBy || ""}</div>
+            <div class="article-ref">${escapeHtml(item.ref || "")}</div>
+            <div class="article-name">${escapeHtml(item.name || "")}</div>
+            <div class="count">${escapeHtml(item.createdBy || "")}</div>
           </div>
-          <div class="badge">${item.mode || ""}</div>
+          <div class="badge">${escapeHtml(item.mode || "")}</div>
         </div>
 
-        <div class="status-grid">
-          <button class="status ${item.achat?'done':''}" onclick="editDate('${item.id}','achat')">Achat<br>${item.achat || "Date"}</button>
-          <button class="status ${item.depot?'done':''}" onclick="editDate('${item.id}','depot')">Dépôt<br>${item.depot || "Date"}</button>
-          <button class="status ${item.expedie?'done':''}" onclick="editDate('${item.id}','expedie')">Expédié<br>${item.expedie || "Date"}</button>
+        <div class="status-line">
+          <span class="mini-status ${item.achat?'done':''}">Achat: ${escapeHtml(item.achat || "—")}</span>
+          <span class="mini-status ${item.depot?'done':''}">Dépôt: ${escapeHtml(item.depot || "—")}</span>
+          <span class="mini-status ${item.expedie?'done':''}">Expédié: ${escapeHtml(item.expedie || "—")}</span>
         </div>
 
-        <button class="delete" onclick="deleteArticle('${item.id}')">Supprimer</button>
+        <div class="action-row">
+          <button class="edit-btn" onclick="startArticleEdit('${item.id}')">Modifier</button>
+          <button class="delete" onclick="deleteArticle('${item.id}')">Supprimer</button>
+        </div>
+        ${editPanel}
       </div>
     `;
   });
 }
 
-window.editDate = function(id,field){
-  let oldValue = allArticles[id]?.[field] || "";
-  let date = prompt("Entrer ou modifier la date :", oldValue);
-  if(date === null) return;
-  update(ref(db,`articles/${id}`), {[field]: date.trim()});
+function escapeHtml(value){
+  return String(value)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+window.startArticleEdit = function(id){
+  editingArticleId = id;
+  renderArticles();
+}
+
+window.cancelArticleEdit = function(){
+  editingArticleId = "";
+  renderArticles();
+}
+
+window.saveArticleEdit = function(id){
+  let refVal = document.getElementById(`editRef_${id}`).value.trim();
+  let nameVal = document.getElementById(`editName_${id}`).value.trim();
+  let modeVal = document.getElementById(`editMode_${id}`).value;
+  let achatVal = document.getElementById(`editAchat_${id}`).value.trim();
+  let depotVal = document.getElementById(`editDepot_${id}`).value.trim();
+  let expedieVal = document.getElementById(`editExpedie_${id}`).value.trim();
+
+  if(!refVal){
+    alert("La référence est obligatoire");
+    return;
+  }
+
+  update(ref(db,`articles/${id}`), {
+    ref: refVal,
+    name: nameVal,
+    mode: modeVal,
+    achat: achatVal,
+    depot: depotVal,
+    expedie: expedieVal
+  });
+
+  selectedMode = modeVal;
+  editingArticleId = "";
 }
 
 window.deleteArticle = function(id){
@@ -509,7 +725,7 @@ function renderExpeditions(){
   }
 
   dates.forEach(date=>{
-    dateBox.innerHTML += `<button class="${selectedExpDate===date?'active':''}" onclick="selectExpDate('${date}')">${date} (${dateCounts[date]})</button>`;
+    dateBox.innerHTML += `<button class="${selectedExpDate===date?'active':''}" onclick="selectExpDate('${escapeForJs(date)}')">${escapeHtml(date)} (${dateCounts[date]})</button>`;
   });
 
   if(selectedExpDate){
@@ -562,12 +778,12 @@ function renderExpeditions(){
       <div class="article">
         <div class="article-head">
           <div>
-            <div class="article-ref">${item.ref || ""}</div>
-            <div class="article-name">${item.name || ""}</div>
-            <div class="count">Expédié : ${item.expedie || ""}</div>
-            <div class="count">${item.createdBy || ""}</div>
+            <div class="article-ref">${escapeHtml(item.ref || "")}</div>
+            <div class="article-name">${escapeHtml(item.name || "")}</div>
+            <div class="count">Expédié : ${escapeHtml(item.expedie || "")}</div>
+            <div class="count">${escapeHtml(item.createdBy || "")}</div>
           </div>
-          <div class="badge">${mode}</div>
+          <div class="badge">${escapeHtml(mode)}</div>
         </div>
         ${mode === "SEA" || WEIGHT_MODES.includes(mode) ? `
           <div class="ship-box">
@@ -607,6 +823,10 @@ function renderExpeditions(){
 
   document.getElementById("deleteAllExpBtn").style.display = "block";
   document.getElementById("downloadExpBtn").style.display = "block";
+}
+
+function escapeForJs(value){
+  return String(value).replaceAll("\\","\\\\").replaceAll("'","\\'");
 }
 
 window.updateShippingValue = function(id,field,value){
