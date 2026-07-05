@@ -2564,6 +2564,88 @@ body{
 .product-card .article-photo-file{display:none !important}
 @media(max-width:980px){.hero.dynamic-hero{grid-template-columns:1fr !important}.home-banner-slot{height:150px}.product-cards-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.product-card{min-height:250px;padding:11px}.product-card-photo{height:104px}}
 
+
+
+/* ===== MISE À JOUR FINALE : PARAMÈTRES + FRAIS LISIBLE ===== */
+#frais, #frais *{
+  color:#0f172a !important;
+}
+#frais .card, #frais .type-card, #frais .frais-panel, #fraisInputs{
+  background:#ffffff !important;
+}
+#frais h2{
+  color:#0f172a !important;
+  font-weight:1000 !important;
+}
+#frais label{
+  color:#334155 !important;
+  font-weight:950 !important;
+}
+#frais input, #frais select, #frais textarea{
+  background:#ffffff !important;
+  color:#0f172a !important;
+  border:1px solid #cbd5e1 !important;
+}
+#frais input::placeholder{
+  color:#64748b !important;
+}
+#frais .type-card{
+  background:#f8fafc !important;
+  color:#0f172a !important;
+  border:1px solid #dbe4f0 !important;
+}
+#frais .type-card span{
+  color:#0f172a !important;
+}
+#frais .type-card.active{
+  background:linear-gradient(135deg,#2563eb,#4f46e5) !important;
+  color:#ffffff !important;
+  border-color:transparent !important;
+}
+#frais .type-card.active span{
+  color:#ffffff !important;
+}
+#frais .result{
+  background:#eff6ff !important;
+  color:#1d4ed8 !important;
+  font-weight:1000 !important;
+  border:1px solid #bfdbfe !important;
+}
+#parametres, #parametres *{
+  color:#0f172a !important;
+}
+#parametres .card, .setting-image-card{
+  background:#ffffff !important;
+  border:1px solid #e2e8f0 !important;
+}
+#parametres input, #parametres select, #parametres textarea{
+  background:#ffffff !important;
+  color:#0f172a !important;
+  border:1px solid #cbd5e1 !important;
+}
+.setting-image-preview{
+  background:#f8fafc !important;
+  color:#475569 !important;
+  border:1px dashed #cbd5e1 !important;
+}
+.setting-image-preview .icon-empty, .icon-empty{
+  background:#ffffff !important;
+  border-color:#94a3b8 !important;
+}
+.color-grid input[type=color]{
+  height:48px !important;
+  padding:4px !important;
+}
+@media(max-width:980px){
+  .tabs{
+    grid-template-columns:repeat(5,1fr) !important;
+    height:82px !important;
+  }
+  .tabs button{
+    font-size:10px !important;
+  }
+}
+
 </style>
 </head>
 
@@ -2741,7 +2823,7 @@ body{
           Supprimer toute cette liste
         </button>
       </div>
-
+    </div>
 
     <div id="parametres" class="section">
       <div class="card">
@@ -2763,6 +2845,7 @@ body{
           <label>Vert <input type="color" id="colorGreen" onchange="saveThemeColor('green',this.value)"></label>
           <label>Orange <input type="color" id="colorOrange" onchange="saveThemeColor('orange',this.value)"></label>
           <label>Rouge <input type="color" id="colorRed" onchange="saveThemeColor('red',this.value)"></label>
+          <label>Texte <input type="color" id="colorText" onchange="saveThemeColor('text',this.value)"></label>
         </div>
       </div>
     </div>
@@ -3030,6 +3113,11 @@ function applyVisualSettings(){
   if(c.green) root.style.setProperty('--d-green',c.green);
   if(c.orange) root.style.setProperty('--d-orange',c.orange);
   if(c.red) root.style.setProperty('--d-red',c.red);
+  if(c.text){
+    root.style.setProperty('--d-text',c.text);
+    root.style.setProperty('--soft-text',c.text);
+    root.style.setProperty('--final-text',c.text);
+  }
   const logo=document.querySelector('.logo-icon');
   if(logo){ logo.innerHTML = visualSettings.logo ? `<img src="${visualSettings.logo}" class="kiah-img-icon" alt="Logo">` : iconImg('logo'); }
   document.querySelectorAll('.tabs button').forEach(btn=>{
@@ -3052,6 +3140,8 @@ function applyVisualSettings(){
     slot.innerHTML = visualSettings.bannerAccueil ? `<img src="${visualSettings.bannerAccueil}" alt="Bannière accueil">` : `<div><div class="plus">+</div><div>Ajouter une photo</div></div>`;
   }
   ['colorPrimary','colorGreen','colorOrange','colorRed'].forEach(id=>{ const el=document.getElementById(id); if(el){ const key=id.replace('color','').toLowerCase(); el.value=c[key] || (key==='primary'?'#0969ff':key==='green'?'#19b96f':key==='orange'?'#ff7a00':'#ff3650'); }});
+  const colorTextEl = document.getElementById('colorText');
+  if(colorTextEl) colorTextEl.value = c.text || '#0f172a';
 }
 function getVisualValue(key){ return key==='logo'||key==='bannerAccueil' ? visualSettings[key] : visualSettings.icons?.[key]; }
 function renderVisualSettingsPanel(){
