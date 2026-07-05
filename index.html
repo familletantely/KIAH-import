@@ -2646,6 +2646,146 @@ body{
   }
 }
 
+
+
+/* ===== MISE À JOUR SIMPLE ACCUEIL + LISIBILITÉ ===== */
+#homeStats,
+#home .dashboard-row,
+#homeTypeGrid,
+#homeTypeGrid.closest-card{
+  display:none !important;
+}
+#home > .card:not(.hero):not(.home-menu-card){
+  display:none !important;
+}
+.home-menu-card{
+  display:block !important;
+  background:transparent !important;
+  border:0 !important;
+  box-shadow:none !important;
+  padding:4px 0 18px !important;
+}
+.home-menu-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:18px;
+}
+.home-big-btn{
+  min-height:190px;
+  border-radius:28px !important;
+  background:#fff !important;
+  color:#101828 !important;
+  border:1px solid #e7eef7 !important;
+  box-shadow:0 14px 34px rgba(45,72,110,.10) !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:15px !important;
+  font-size:19px !important;
+}
+.home-big-img{
+  width:92px;
+  height:92px;
+  border-radius:24px;
+  background:#f2f7ff;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+}
+.home-big-img img,.home-big-img .kiah-img-icon{
+  width:100%;height:100%;object-fit:contain;
+}
+.home-big-btn b{color:#101828 !important;}
+
+/* Frais lisible */
+#frais,
+#frais h2,
+#frais label,
+#frais .type-card,
+#frais input,
+#frais select,
+#frais .result{
+  color:#111827 !important;
+}
+#frais .card,#frais .type-card{background:#fff !important;}
+#frais label{color:#374151 !important;font-weight:900 !important;}
+#frais input{background:#fff !important;color:#111827 !important;border:1px solid #cbd5e1 !important;}
+#frais .type-card{border:1px solid #e5e7eb !important;box-shadow:0 10px 22px rgba(30,64,175,.06) !important;}
+#frais .type-card span{color:#111827 !important;}
+#frais .type-card.active{background:linear-gradient(135deg,#2563eb,#4f46e5) !important;color:white !important;}
+#frais .type-card.active span{color:white !important;}
+#frais .result{background:#eff6ff !important;color:#1d4ed8 !important;font-weight:1000 !important;}
+
+/* Articles plus sobres */
+#articleCategoryCards{grid-template-columns:repeat(6,minmax(0,1fr)) !important;gap:10px !important;}
+#articleCategoryCards .category-card{min-height:96px !important;padding:12px !important;border-radius:18px !important;color:#111827 !important;}
+#articleCategoryCards .cat-icon{width:38px !important;height:38px !important;border-radius:12px !important;margin-bottom:8px !important;}
+#articleCategoryCards .cat-icon img{width:28px !important;height:28px !important;}
+#articleCategoryCards b{font-size:13px !important;color:#111827 !important;}
+#articleCategoryCards .big{font-size:24px !important;margin:8px 0 2px !important;color:#111827 !important;}
+#articleCategoryCards .count{font-size:11px !important;color:#6b7280 !important;}
+#articles .search-row{position:sticky;top:76px;z-index:20;background:rgba(246,250,255,.94);padding:8px;border-radius:16px;backdrop-filter:blur(10px);}
+#articles .card-title-row > button.primary{display:none !important;}
+#articles::after{
+  content:"+";
+  position:fixed;
+  right:22px;
+  bottom:100px;
+  width:58px;height:58px;
+  border-radius:999px;
+  background:linear-gradient(135deg,#2563eb,#4f46e5);
+  color:white;
+  display:grid;
+  place-items:center;
+  font-size:34px;
+  font-weight:900;
+  box-shadow:0 14px 30px rgba(37,99,235,.26);
+  z-index:55;
+  pointer-events:none;
+}
+#articles .floating-add-click{
+  position:fixed;
+}
+
+/* Calendrier expéditions en noir et lisible */
+#expeditions,
+#expeditions h2,
+#expeditions .exp-calendar,
+#expeditions .exp-calendar strong,
+#expeditions .exp-cal-day,
+#expeditions .exp-cal-week,
+#expeditions .exp-calendar-note,
+#expeditions .count{
+  color:#111827 !important;
+}
+#expeditions .exp-calendar{background:#fff !important;border:1px solid #e5e7eb !important;}
+#expeditions .exp-cal-week{color:#374151 !important;}
+#expeditions .exp-cal-day{background:#f8fafc !important;border:1px solid #e5e7eb !important;}
+#expeditions .exp-cal-day.other{opacity:.45 !important;color:#6b7280 !important;}
+#expeditions .exp-cal-day.hasArticles{background:#eef5ff !important;color:#111827 !important;border-color:#93c5fd !important;}
+#expeditions .exp-cal-day.selected{background:#2563eb !important;color:#fff !important;border-color:#2563eb !important;}
+#expeditions .exp-calendar-note{color:#4b5563 !important;}
+#expeditions .search-row{position:sticky;top:76px;z-index:20;}
+.exp-card-grid{grid-template-columns:repeat(auto-fill,minmax(180px,1fr)) !important;}
+.exp-product-card{color:#111827 !important;}
+.exp-card-input input{height:38px !important;margin:8px 0 4px !important;color:#111827 !important;}
+#expeditions .summary-box{background:#fff !important;color:#111827 !important;border:1px solid #e5e7eb !important;}
+
+/* Paramètres + couleurs texte */
+#parametres,#parametres h2,#parametres label,.setting-image-card b{color:#111827 !important;}
+#parametres .card,.setting-image-card{background:#fff !important;color:#111827 !important;}
+.setting-image-preview{background:#f8fafc !important;color:#4b5563 !important;}
+
+@media(max-width:980px){
+  .home-menu-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
+  .home-big-btn{min-height:145px;border-radius:22px !important;font-size:16px !important;}
+  .home-big-img{width:68px;height:68px;border-radius:18px;}
+  #articleCategoryCards{grid-template-columns:repeat(3,minmax(0,1fr)) !important;}
+  #articleCategoryCards .category-card{min-height:86px !important;padding:9px !important;}
+  #articles .search-row{top:70px;}
+}
+
 </style>
 </head>
 
@@ -2710,6 +2850,10 @@ body{
           <div>Suivi fiable</div>
           <div>Gestion complète</div>
         </div>
+      </div>
+
+      <div class="card home-menu-card">
+        <div class="home-menu-grid" id="homeMainButtons"></div>
       </div>
 
       <div class="stat-grid" id="homeStats"></div>
@@ -2853,6 +2997,7 @@ body{
   </div>
 
   <button class="logout" onclick="logout()">Déconnexion</button>
+  <button class="floating-add-btn" onclick="openAddArticle()">+</button>
 
   <div class="tabs">
     <button class="active" data-tab="home" onclick="openTab('home',this)"><span class="ico"><img src="icons/home-box.svg" alt=""></span>Accueil</button>
@@ -3101,6 +3246,7 @@ window.uploadPhotosDirect=async function(id,fileList){ const files=Array.from(fi
 
 const VISUAL_ITEMS = [
   ["logo","Logo"],["bannerAccueil","Bannière accueil"],
+  ["homeFrais","Photo bouton Frais"],["homeArticles","Photo bouton Articles"],["homeExpeditions","Photo bouton Expéditions"],["homeParametres","Photo bouton Paramètres"],
   ["home","Icône Accueil"],["frais","Icône Frais"],["articles","Icône Articles"],["expeditions","Icône Expéditions"],["calendar","Icône Calendrier"],["settings","Icône Paramètres"],
   ["global","Icône GLOBAL"],["logout","Icône Déconnexion"],
   ["sea","Badge SEA"],["air","Badge AIR"],["exp","Badge EXP"],["airbatt","Badge AIR BATT"],
@@ -3113,6 +3259,7 @@ function applyVisualSettings(){
   if(c.green) root.style.setProperty('--d-green',c.green);
   if(c.orange) root.style.setProperty('--d-orange',c.orange);
   if(c.red) root.style.setProperty('--d-red',c.red);
+  if(c.text){ root.style.setProperty('--d-text',c.text); root.style.setProperty('--soft-text',c.text); }
   if(c.text){
     root.style.setProperty('--d-text',c.text);
     root.style.setProperty('--soft-text',c.text);
@@ -3139,7 +3286,7 @@ function applyVisualSettings(){
     }
     slot.innerHTML = visualSettings.bannerAccueil ? `<img src="${visualSettings.bannerAccueil}" alt="Bannière accueil">` : `<div><div class="plus">+</div><div>Ajouter une photo</div></div>`;
   }
-  ['colorPrimary','colorGreen','colorOrange','colorRed'].forEach(id=>{ const el=document.getElementById(id); if(el){ const key=id.replace('color','').toLowerCase(); el.value=c[key] || (key==='primary'?'#0969ff':key==='green'?'#19b96f':key==='orange'?'#ff7a00':'#ff3650'); }});
+  ['colorPrimary','colorGreen','colorOrange','colorRed','colorText'].forEach(id=>{ const el=document.getElementById(id); if(el){ const key=id.replace('color','').toLowerCase(); el.value=c[key] || (key==='primary'?'#0969ff':key==='green'?'#19b96f':key==='orange'?'#ff7a00':key==='red'?'#ff3650':'#111827'); }});
   const colorTextEl = document.getElementById('colorText');
   if(colorTextEl) colorTextEl.value = c.text || '#0f172a';
 }
@@ -3454,6 +3601,20 @@ window.selectExpCalendarDate = selectExpCalendarDate;
 /* HOME */
 
 function renderHome(){
+  const homeMenu = document.getElementById("homeMainButtons");
+  if(homeMenu){
+    const buttons = [
+      {tab:"frais", title:"Frais", key:"homeFrais", fallback:"briefcase"},
+      {tab:"articles", title:"Articles", key:"homeArticles", fallback:"article-box"},
+      {tab:"expeditions", title:"Expéditions", key:"homeExpeditions", fallback:"truck"},
+      {tab:"parametres", title:"Paramètres", key:"homeParametres", fallback:"settings"}
+    ];
+    homeMenu.innerHTML = buttons.map(b=>{
+      const img = visualSettings?.icons?.[b.key] || "";
+      const visual = img ? `<img src="${img}" alt="${b.title}">` : iconImg(b.fallback);
+      return `<button class="home-big-btn" onclick="openTabById('${b.tab}')"><span class="home-big-img">${visual}</span><b>${b.title}</b></button>`;
+    }).join("");
+  }
   let articles = getVisibleArticles();
   let active = articles.filter(a=>!a.archived);
   let shipped = active.filter(a=>(a.expedie||"").trim());
@@ -3874,32 +4035,48 @@ function renderExpeditions(){
     return;
   }
   let totalCbm = 0, totalKg = 0, totalPrice = 0;
-  box.innerHTML = `<div class="compact-table-head"><div>Photo</div><div>Article</div><div>Type</div><div>Date</div><div>CBM/Kg</div><div>Prix</div><div></div></div>`;
+  box.innerHTML = `<div class="product-cards-grid exp-card-grid"></div>`;
+  const grid = box.querySelector('.product-cards-grid');
   articles.forEach(item=>{
-    let mode = item.mode || "";
-    let value = 0, price = 0, inputHtml = "—", priceHtml = "";
+    let mode = item.mode || "AUTRE";
+    let value = 0, price = 0, qtyText = "—", inputHtml = "";
     if(mode === "SEA"){
       value = parseFloat(item.expCbm) || 0;
       price = value * getSeaPricePerCbm();
       totalCbm += value; totalPrice += price;
+      qtyText = value ? `${value} CBM` : "CBM vide";
       inputHtml = `<input type="number" step="0.01" value="${item.expCbm || ""}" placeholder="CBM" onchange="updateShippingValue('${item.id}','expCbm',this.value)">`;
-      priceHtml = formatAr(price);
     }else if(WEIGHT_MODES.includes(mode)){
       value = parseFloat(item.expKg) || 0;
       price = value * getKgPrice(mode);
       totalKg += value; totalPrice += price;
+      qtyText = value ? `${value} KG` : "KG vide";
       inputHtml = `<input type="number" step="0.01" value="${item.expKg || ""}" placeholder="Kg" onchange="updateShippingValue('${item.id}','expKg',this.value)">`;
-      priceHtml = formatAr(price);
     }
-    box.innerHTML += `
-      <div class="article compact-row">
-        ${renderArticlePhotos(item)}
-        <div class="compact-cell-main"><div class="compact-ref">${item.ref || ""}</div><div class="compact-name">${item.name || ""}</div></div>
-        <div class="cell-mode">${modeBadge(mode)}</div>
-        <div class="compact-muted cell-date">${normalizeDateKey(item.expedie || "")}</div>
-        <div class="cell-qty">${inputHtml}</div>
-        <div class="compact-price cell-price">${priceHtml}</div>
-        <div class="article-actions"><button class="action-mini" onclick="openEditArticle('${item.id}')">Modifier</button></div>
+    let photos = getPhotoList(item);
+    let first = photos[0]?.url || "";
+    let inputId = `expCardPhoto_${item.id}`;
+    let badgeCls = mode === "AIR" ? "air" : mode === "EXP" ? "exp" : mode === "AIR BATT" ? "batt" : mode === "AUTRE" ? "autre" : "";
+    grid.innerHTML += `
+      <div class="product-card exp-product-card" ondblclick="openEditArticle('${item.id}')">
+        <div class="product-badge ${badgeCls}">${mode}</div>
+        <div class="product-card-photo ${first?'':'empty'}" onclick="${first ? `openArticleGallery('${item.id}')` : `document.getElementById('${inputId}').click()`}">
+          ${first ? `<img src="${first}" alt="Photo produit">` : `<span>+</span>`}
+          <button class="product-card-add-photo" onclick="event.stopPropagation(); document.getElementById('${inputId}').click()" type="button">+</button>
+          <input class="article-photo-file" id="${inputId}" type="file" accept="image/*" multiple onchange="uploadPhotosDirect('${item.id}', this.files); this.value='';">
+        </div>
+        <div class="product-ref">${item.ref || ""}</div>
+        <div class="product-name">${item.name || ""}</div>
+        <div class="product-dates">
+          <span class="product-date blue">${normalizeDateKey(item.expedie || "")}</span>
+          <span class="product-date">${qtyText}</span>
+        </div>
+        <div class="exp-card-input">${inputHtml}</div>
+        <div class="product-bottom">
+          <div class="product-weight">${formatAr(price)}</div>
+          <span class="product-status expedie">Expédié</span>
+        </div>
+        <button class="action-mini" style="width:100%;margin-top:12px" onclick="openEditArticle('${item.id}')">Modifier</button>
       </div>`;
   });
   if(selectedExpMode === "SEA"){
@@ -3970,5 +4147,11 @@ window.openTabById = function(id){
 }
 </script>
 
+
+<style>
+.floating-add-btn{display:none;position:fixed;right:22px;bottom:100px;width:58px;height:58px;border-radius:999px!important;background:linear-gradient(135deg,#2563eb,#4f46e5)!important;color:white!important;font-size:34px!important;font-weight:900!important;box-shadow:0 14px 30px rgba(37,99,235,.26)!important;z-index:90;padding:0!important;}
+body:has(#articles.section.active) .floating-add-btn{display:grid;place-items:center;}
+@media(max-width:980px){.floating-add-btn{bottom:96px;right:16px}}
+</style>
 </body>
 </html>
