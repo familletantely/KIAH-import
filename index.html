@@ -2786,6 +2786,74 @@ body{
   #articles .search-row{top:70px;}
 }
 
+
+
+/* ===== REGLAGE CADRAGE PHOTO ARTICLE ===== */
+.article-crop-box{
+  margin-top:12px;
+  padding:14px;
+  border-radius:18px;
+  border:1px solid #e2eaf5;
+  background:#f8fbff;
+}
+.article-crop-title{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:10px;
+  color:#0f1f35;
+  font-weight:950;
+}
+.article-crop-preview{
+  height:160px;
+  border-radius:18px;
+  background:#fff;
+  border:1px solid #dbe7f5;
+  overflow:hidden;
+  display:grid;
+  place-items:center;
+  margin-bottom:12px;
+}
+.article-crop-preview img{
+  width:100%;
+  height:100%;
+  display:block;
+  object-fit:contain;
+  transform-origin:center center;
+}
+.article-crop-controls{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+.article-crop-controls label{
+  color:#334155 !important;
+  font-weight:900 !important;
+  font-size:12px !important;
+}
+.article-crop-controls input[type=range]{
+  padding:0 !important;
+  height:32px;
+}
+.article-crop-actions{
+  display:flex;
+  gap:8px;
+  margin-top:10px;
+}
+.article-crop-actions button{
+  width:auto !important;
+  padding:9px 12px !important;
+  border-radius:12px !important;
+}
+.product-card-photo img,.article-photo-cover{
+  transform-origin:center center !important;
+}
+@media(max-width:900px){
+  .article-crop-controls{grid-template-columns:1fr}
+  .article-crop-preview{height:140px}
+}
+
 </style>
 </head>
 
@@ -3074,6 +3142,30 @@ body{
           <input id="modalPhotos" type="file" accept="image/*" multiple>
           <div id="uploadProgress" class="upload-progress"><span></span> Téléchargement photo...</div>
           <div id="modalPhotoPreview" class="photo-preview-grid"></div>
+          <div class="article-crop-box">
+            <div class="article-crop-title">
+              <span>Cadrage photo dans les cartes</span>
+              <button type="button" class="secondary" onclick="resetArticleCrop()">Réinitialiser</button>
+            </div>
+            <div class="article-crop-preview" id="articleCropPreview"><span class="count">Ajoute une photo pour voir l’aperçu</span></div>
+            <div class="article-crop-controls">
+              <label>Zoom
+                <input id="cropZoom" type="range" min="0.6" max="2.5" step="0.05" value="1" oninput="updateArticleCropFromInputs()">
+              </label>
+              <label>Gauche / Droite
+                <input id="cropX" type="range" min="-60" max="60" step="1" value="0" oninput="updateArticleCropFromInputs()">
+              </label>
+              <label>Haut / Bas
+                <input id="cropY" type="range" min="-60" max="60" step="1" value="0" oninput="updateArticleCropFromInputs()">
+              </label>
+              <label>Affichage
+                <select id="cropFit" onchange="updateArticleCropFromInputs()">
+                  <option value="contain">Voir toute la photo</option>
+                  <option value="cover">Remplir la carte</option>
+                </select>
+              </label>
+            </div>
+          </div>
         </div>
       </div>
       <div class="full">
@@ -3179,6 +3271,7 @@ const CLOUDINARY_CLOUD_NAME = "deiu80zsn";
 const CLOUDINARY_UPLOAD_PRESET = "kiah_import_upload";
 let modalExistingPhotos = [];
 let modalNewFiles = [];
+let modalPhotoCrop = {zoom:1,x:0,y:0,fit:"contain"};
 let viewerPhotos = [];
 let viewerIndex = 0;
 
@@ -3186,6 +3279,55 @@ function getPhotoList(item){
   if(Array.isArray(item?.photos)) return item.photos.filter(p=>p && p.url);
   if(item?.photoUrl) return [{url:item.photoUrl, publicId:item.publicId || ""}];
   return [];
+}
+function normalizePhotoCrop(crop){
+  return {
+    zoom: Math.min(2.5, Math.max(0.6, parseFloat(crop?.zoom) || 1)),
+    x: Math.min(60, Math.max(-60, parseFloat(crop?.x) || 0)),
+    y: Math.min(60, Math.max(-60, parseFloat(crop?.y) || 0)),
+    fit: crop?.fit === "cover" ? "cover" : "contain"
+  };
+}
+function photoCropStyle(item){
+  const c = normalizePhotoCrop(item?.photoCrop);
+  return `object-fit:${c.fit};transform:translate(${c.x}%,${c.y}%) scale(${c.zoom});`;
+}
+function currentModalPreviewPhoto(){
+  if(modalExistingPhotos[0]?.url) return modalExistingPhotos[0].url;
+  if(modalNewFiles[0]) return URL.createObjectURL(modalNewFiles[0]);
+  return "";
+}
+function applyCropInputs(){
+  const c = normalizePhotoCrop(modalPhotoCrop);
+  const zoom = document.getElementById("cropZoom");
+  const x = document.getElementById("cropX");
+  const y = document.getElementById("cropY");
+  const fit = document.getElementById("cropFit");
+  if(zoom) zoom.value = c.zoom;
+  if(x) x.value = c.x;
+  if(y) y.value = c.y;
+  if(fit) fit.value = c.fit;
+}
+function renderArticleCropPreview(){
+  const box = document.getElementById("articleCropPreview");
+  if(!box) return;
+  const url = currentModalPreviewPhoto();
+  if(!url){ box.innerHTML = `<span class="count">Ajoute une photo pour voir l’aperçu</span>`; return; }
+  box.innerHTML = `<img src="${url}" style="${photoCropStyle({photoCrop:modalPhotoCrop})}" alt="Aperçu cadrage">`;
+}
+window.updateArticleCropFromInputs = function(){
+  modalPhotoCrop = normalizePhotoCrop({
+    zoom: document.getElementById("cropZoom")?.value,
+    x: document.getElementById("cropX")?.value,
+    y: document.getElementById("cropY")?.value,
+    fit: document.getElementById("cropFit")?.value
+  });
+  renderArticleCropPreview();
+}
+window.resetArticleCrop = function(){
+  modalPhotoCrop = {zoom:1,x:0,y:0,fit:"contain"};
+  applyCropInputs();
+  renderArticleCropPreview();
 }
 function cloudinaryMonthFolder(){
   const d = new Date();
@@ -3221,6 +3363,8 @@ function renderModalPhotos(){
   modalExistingPhotos.forEach((p,i)=>{ box.innerHTML += `<div class="photo-thumb-wrap"><img src="${p.url}" onclick="openPhotoViewer(['${p.url}'],0,event)"><button class="photo-remove" onclick="removeExistingPhoto(${i})" type="button">×</button></div>`; });
   modalNewFiles.forEach((file,i)=>{ const url=URL.createObjectURL(file); box.innerHTML += `<div class="photo-thumb-wrap"><img src="${url}"><button class="photo-remove" onclick="removeNewPhoto(${i})" type="button">×</button></div>`; });
   if(!modalExistingPhotos.length && !modalNewFiles.length) box.innerHTML=`<div class="count">Aucune photo ajoutée</div>`;
+  applyCropInputs();
+  renderArticleCropPreview();
 }
 window.removeExistingPhoto=function(index){ modalExistingPhotos.splice(index,1); renderModalPhotos(); }
 window.removeNewPhoto=function(index){ modalNewFiles.splice(index,1); renderModalPhotos(); }
@@ -3230,7 +3374,7 @@ function renderArticlePhotos(item){
   const count=photos.length;
   const inputId=`directPhoto_${item.id}`;
   return `<div class="article-photo-cell" id="photoCell_${item.id}">
-    ${count ? `<div class="article-photo-stack" onclick="openArticleGallery('${item.id}')" title="Voir les photos"><img class="article-photo-cover" src="${first}" alt="Photo article">${count>1?`<span class="article-photo-count">${count}</span>`:""}</div>` : `<div class="article-photo-empty" onclick="document.getElementById('${inputId}').click()" title="Ajouter photo">📷</div>`}
+    ${count ? `<div class="article-photo-stack" onclick="openArticleGallery('${item.id}')" title="Voir les photos"><img class="article-photo-cover" src="${first}" style="${photoCropStyle(item)}" alt="Photo article">${count>1?`<span class="article-photo-count">${count}</span>`:""}</div>` : `<div class="article-photo-empty" onclick="document.getElementById('${inputId}').click()" title="Ajouter photo">📷</div>`}
     <button class="article-photo-add" onclick="document.getElementById('${inputId}').click()" type="button" title="Ajouter photo">+</button>
     <input class="article-photo-file" id="${inputId}" type="file" accept="image/*" multiple onchange="uploadPhotosDirect('${item.id}', this.files); this.value='';">
     <div class="inline-upload"><span></span></div>
@@ -3794,6 +3938,7 @@ window.openAddArticle = function(){
   document.getElementById("modalNote").value = "";
   modalExistingPhotos = [];
   modalNewFiles = [];
+  modalPhotoCrop = {zoom:1,x:0,y:0,fit:"contain"};
   renderModalPhotos();
   document.getElementById("modalDeleteBtn").style.display = "none";
   adjustModalFields();
@@ -3816,6 +3961,7 @@ window.openEditArticle = function(id){
   document.getElementById("modalNote").value = item.note || "";
   modalExistingPhotos = getPhotoList(item);
   modalNewFiles = [];
+  modalPhotoCrop = normalizePhotoCrop(item.photoCrop);
   renderModalPhotos();
   document.getElementById("modalDeleteBtn").style.display = "block";
   adjustModalFields();
@@ -3849,6 +3995,7 @@ window.saveArticleModal = async function(){
       expKg: document.getElementById("modalKg").value,
       note: document.getElementById("modalNote").value.trim(),
       photos,
+      photoCrop: normalizePhotoCrop(modalPhotoCrop),
       archived: document.getElementById("modalArchived").value === "archived"
     };
     if(editingArticleId){
@@ -3968,7 +4115,7 @@ window.renderArticles = function(){
       <div class="product-card" ondblclick="openEditArticle('${item.id}')">
         <div class="product-badge ${badgeCls}">${mode}</div>
         <div class="product-card-photo ${first?'':'empty'}" onclick="${first ? `openArticleGallery('${item.id}')` : `document.getElementById('${inputId}').click()`}">
-          ${first ? `<img src="${first}" alt="Photo produit">` : `<span>+</span>`}
+          ${first ? `<img src="${first}" style="${photoCropStyle(item)}" alt="Photo produit">` : `<span>+</span>`}
           <button class="product-card-add-photo" onclick="event.stopPropagation(); document.getElementById('${inputId}').click()" type="button">+</button>
           <input class="article-photo-file" id="${inputId}" type="file" accept="image/*" multiple onchange="uploadPhotosDirect('${item.id}', this.files); this.value='';">
         </div>
@@ -4061,7 +4208,7 @@ function renderExpeditions(){
       <div class="product-card exp-product-card" ondblclick="openEditArticle('${item.id}')">
         <div class="product-badge ${badgeCls}">${mode}</div>
         <div class="product-card-photo ${first?'':'empty'}" onclick="${first ? `openArticleGallery('${item.id}')` : `document.getElementById('${inputId}').click()`}">
-          ${first ? `<img src="${first}" alt="Photo produit">` : `<span>+</span>`}
+          ${first ? `<img src="${first}" style="${photoCropStyle(item)}" alt="Photo produit">` : `<span>+</span>`}
           <button class="product-card-add-photo" onclick="event.stopPropagation(); document.getElementById('${inputId}').click()" type="button">+</button>
           <input class="article-photo-file" id="${inputId}" type="file" accept="image/*" multiple onchange="uploadPhotosDirect('${item.id}', this.files); this.value='';">
         </div>
