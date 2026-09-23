@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -3037,6 +3038,21 @@ body{
       </div>
     </div>
 
+    <div id="commandes" class="section">
+      <div class="card orders-hero">
+        <div class="card-title-row"><div><span class="orders-eyebrow">KIAH · PILOTAGE</span><h2>Commandes export</h2><div class="count">Suivi simple, du dépôt au transit.</div></div><button class="primary orders-add" onclick="openOrderForm()">＋ Nouvelle commande</button></div>
+        <div class="order-stats" id="orderStats"></div>
+      </div>
+      <div class="card">
+        <div class="orders-toolbar"><input id="orderSearch" placeholder="⌕  Nom ou numéro de suivi" oninput="renderOrders()"><select id="orderModeFilter" onchange="renderOrders()"><option value="">Tous les modes</option><option>SEA</option><option>AIR</option><option>EXP</option></select><select id="orderStatusFilter" onchange="renderOrders()"><option value="">Tous les statuts</option><option value="depot">Au dépôt</option><option value="transit">En transit</option><option value="pay">À payer</option></select></div>
+        <div class="order-mode-counts" id="orderModeCounts"></div>
+      </div>
+      <div class="orders-layout">
+        <div class="card orders-list-card"><div class="card-title-row"><h2 id="ordersListTitle">Toutes les commandes</h2><span class="count" id="ordersCount"></span></div><div id="ordersList"></div></div>
+        <div class="card orders-calendar-card"><div class="card-title-row"><h2>Départs en transit</h2><div class="calendar-nav"><button class="secondary" onclick="changeOrderMonth(-1)">‹</button><b id="orderMonthTitle"></b><button class="secondary" onclick="changeOrderMonth(1)">›</button></div></div><div class="order-calendar" id="orderCalendar"></div><button class="secondary calendar-clear" onclick="clearOrderDate()">Voir tous les jours</button><div class="calendar-hint">Les points indiquent les jours avec des départs.</div></div>
+      </div>
+    </div>
+
     <div id="parametres" class="section">
       <div class="card">
         <div class="card-title-row">
@@ -3072,9 +3088,12 @@ body{
     <button data-tab="frais" onclick="openTab('frais',this)"><span class="ico"><img src="icons/briefcase.svg" alt=""></span>Frais</button>
     <button data-tab="articles" onclick="openTab('articles',this)"><span class="ico"><img src="icons/article-box.svg" alt=""></span>Articles</button>
     <button data-tab="expeditions" onclick="openTab('expeditions',this)"><span class="ico"><img src="icons/truck.svg" alt=""></span>Expéditions</button>
+    <button data-tab="commandes" onclick="openTab('commandes',this)"><span class="ico">↗</span>Commandes</button>
     <button data-tab="parametres" onclick="openTab('parametres',this)"><span class="ico"><img src="icons/settings.png" alt=""></span>Paramètres</button>
   </div>
 </div>
+
+<div class="order-modal" id="orderModal" onclick="if(event.target===this)closeOrderForm()"><form class="order-form" onsubmit="saveOrder(event)"><div class="card-title-row"><div><span class="orders-eyebrow">COMMANDE EXPORT</span><h2 id="orderFormTitle">Nouvelle commande</h2></div><button type="button" class="secondary" onclick="closeOrderForm()">✕</button></div><div class="order-form-grid"><label>Nom *<input id="orderName" required maxlength="100" placeholder="Nom de la commande"></label><label>Numéro de suivi<input id="orderTracking" placeholder="Ex. SF123456"></label><label class="order-wide">Détail<textarea id="orderDetail" rows="2" placeholder="Description courte"></textarea></label><label>Prix *<input id="orderPrice" type="number" required min="0" step="1" placeholder="Montant total"></label><label>Mode d’envoi *<select id="orderMode" required onchange="syncOrderMeasureFields()"><option value="">Choisir</option><option>SEA</option><option>AIR</option><option>EXP</option></select></label><label id="orderKgField">Poids (kg)<input id="orderKg" type="number" min="0" step="0.01" placeholder="Facultatif"></label><label id="orderCbmField">Volume (CBM)<input id="orderCbm" type="number" min="0" step="0.01" placeholder="Facultatif"></label><label>Paiement déjà effectué<input id="orderPaid" type="number" min="0" step="1" value="0"></label><label>Date de commande<input id="orderDate" type="date" required></label><label>Date d’arrivée au dépôt<input id="orderDepotDate" type="date"></label><label class="order-wide">Photo<input id="orderPhotoFile" type="file" accept="image/*"><span class="order-photo-preview" id="orderPhotoPreview">Aucune photo</span></label></div><div class="order-form-actions"><button type="button" class="secondary" onclick="closeOrderForm()">Annuler</button><button class="primary" type="submit" id="orderSaveBtn">Enregistrer</button></div></form></div>
 
 <div class="modal" id="articleModal">
   <div class="modal-card">
@@ -3261,6 +3280,11 @@ let selectedExpMode = "";
 let selectedExpDate = "";
 let allUsers = {};
 let allArticles = {};
+let allOrders = {};
+let editingOrderId = null;
+let orderPhotoUrl = "";
+let orderCalendarMonth = new Date();
+let selectedOrderDate = "";
 let listenersStarted = false;
 let fraisType = "SEA";
 let editingArticleId = null;
@@ -3509,6 +3533,7 @@ onAuthStateChanged(auth, async (user)=>{
       listenersStarted = true;
       listenUsers();
       listenArticles();
+      listenOrders();
       listenVisualSettings();
     }
     renderFraisInputs();
@@ -3520,6 +3545,7 @@ onAuthStateChanged(auth, async (user)=>{
 
 function listenUsers(){ onValue(ref(db,"users"), snap=>{ allUsers = snap.val() || {}; }); }
 function listenArticles(){ onValue(ref(db,"articles"), snap=>{ allArticles = snap.val() || {}; renderAll(); }); }
+function listenOrders(){ onValue(ref(db,"orders"), snap=>{ allOrders = snap.val() || {}; renderOrders(); }); }
 function listenVisualSettings(){
   onValue(ref(db,"settings/custom"), snap=>{
     visualSettings = snap.val() || {icons:{}, colors:{}};
@@ -3539,6 +3565,7 @@ function renderAll(){
   renderArticles();
   renderExpeditionModeButtons();
   renderExpeditions();
+  renderOrders();
 }
 
 window.changeUser = function(){
@@ -4265,6 +4292,38 @@ window.downloadCurrentExpedition = function(){
     link.click();
   });
 }
+function orderEsc(value){ return String(value ?? "").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function visibleOrders(){ return Object.entries(allOrders).map(([id,o])=>({...o,id})).filter(o=>selectedUserKey==="GLOBAL"||o.userKey===selectedUserKey); }
+function orderIsLate(o,anchor,days=7){ if(!anchor)return false; let d=new Date(`${anchor}T00:00:00`); let now=new Date(); now.setHours(0,0,0,0); return Math.floor((now-d)/86400000)>=days; }
+function orderStatus(o){ return o.transitDate?"transit":"depot"; }
+function orderPhoto(o){ return o.photoUrl?`<img class="order-thumb" src="${orderEsc(o.photoUrl)}" alt="Photo de ${orderEsc(o.name)}" onclick="openPhotoViewer(['${orderEsc(o.photoUrl)}'],0,event)">`:`<div class="order-thumb order-no-photo">📦</div>`; }
+function renderOrders(){
+ const list=document.getElementById("ordersList"); if(!list)return;
+ const orders=visibleOrders();
+ const depot=orders.filter(o=>!o.transitDate), transit=orders.filter(o=>!!o.transitDate), unpaid=orders.reduce((n,o)=>n+Math.max(0,(+o.price||0)-(+o.paid||0)),0);
+ const stats=document.getElementById("orderStats"); stats.innerHTML=`<div><b>${orders.length}</b><span>Commandes</span></div><div><b>${depot.length}</b><span>Au dépôt</span></div><div><b>${transit.length}</b><span>En transit</span></div><div><b>${formatAr(unpaid)}</b><span>Reste à payer</span></div>`;
+ const counts=document.getElementById("orderModeCounts"); counts.innerHTML=["SEA","AIR","EXP"].map(m=>{let a=orders.filter(o=>o.mode===m);return `<button class="mode-count-pill" onclick="document.getElementById('orderModeFilter').value='${m}';renderOrders()"><b>${m==='SEA'?'Bateau':m==='AIR'?'Avion':'Express'}</b><span>Au dépôt ${a.filter(o=>!o.transitDate).length} · Transit ${a.filter(o=>o.transitDate).length}</span></button>`}).join("");
+ const q=(document.getElementById("orderSearch").value||"").trim().toLowerCase(), mode=document.getElementById("orderModeFilter").value, status=document.getElementById("orderStatusFilter").value;
+ let filtered=orders.filter(o=>(!q||`${o.name||""} ${o.tracking||""}`.toLowerCase().includes(q))&&(!mode||o.mode===mode)&&(!status||(status==="pay"?(+o.price||0)>(+o.paid||0):orderStatus(o)===status))&&(!selectedOrderDate||o.transitDate===selectedOrderDate));
+ filtered.sort((a,b)=>{let aa=orderIsLate(a,a.depotDate?`${a.depotDate}`:a.orderDate)||(!a.depotDate&&orderIsLate(a,a.orderDate))?1:0,bb=orderIsLate(b,b.depotDate?b.depotDate:b.orderDate)||(!b.depotDate&&orderIsLate(b,b.orderDate))?1:0;return bb-aa||(a.orderDate||"").localeCompare(b.orderDate||"")});
+ document.getElementById("ordersCount").textContent=`${filtered.length} commande(s)`; document.getElementById("ordersListTitle").textContent=selectedOrderDate?`Départs du ${selectedOrderDate}`:status==="depot"?"Au dépôt":status==="transit"?"En transit":status==="pay"?"À payer":"Toutes les commandes";
+ if(!filtered.length){list.innerHTML='<div class="orders-empty">Aucune commande pour ces filtres.</div>';renderOrderCalendar(orders);return;}
+ list.innerHTML=filtered.map(o=>{let due=Math.max(0,(+o.price||0)-(+o.paid||0));let lateInbound=!o.depotDate&&orderIsLate(o,o.orderDate),lateDepot=!!o.depotDate&&!o.transitDate&&orderIsLate(o,o.depotDate);let alert=lateInbound?'Pas arrivée au dépôt depuis 7 jours':lateDepot?'Au dépôt depuis 7 jours':'';return `<article class="order-card ${alert?'order-alert':''}">${orderPhoto(o)}<div class="order-main"><div class="order-title-row"><div><h3>${orderEsc(o.name||'Sans nom')}</h3><div class="order-tracking">${orderEsc(o.tracking||'Sans numéro de suivi')} · ${orderEsc(o.mode||'')}</div></div><span class="order-state ${o.transitDate?'state-transit':'state-depot'}">${o.transitDate?'EN TRANSIT':'AU DÉPÔT'}</span></div>${o.detail?`<p class="order-detail">${orderEsc(o.detail)}</p>`:''}<div class="order-meta"><span>${o.kg?`${orderEsc(o.kg)} kg`:''}${o.kg&&o.cbm?' · ':''}${o.cbm?`${orderEsc(o.cbm)} CBM`:''}</span><span>Commande ${orderEsc(o.orderDate||'—')}</span><span>Dépôt ${orderEsc(o.depotDate||'—')}</span>${o.transitDate?`<span>Transit ${orderEsc(o.transitDate)}</span>`:''}</div><div class="order-payline"><span>Payé <b>${formatAr(o.paid)}</b> / ${formatAr(o.price)}</span><b class="${due?'due-money':''}">${due?`Reste ${formatAr(due)}`:'Soldé'}</b></div>${alert?`<div class="order-alert-text">⚠ ${alert}</div>`:''}<div class="order-actions">${!o.transitDate?`<button class="transit-button" onclick="setOrderTransit('${o.id}')">Passer en transit ↗</button>`:''}${due?`<button class="secondary" onclick="addOrderPayment('${o.id}')">＋ Paiement</button>`:''}<button class="secondary" onclick="editOrder('${o.id}')">Modifier</button><button class="order-delete" onclick="deleteOrder('${o.id}')">Supprimer</button></div></div></article>`}).join("");
+ renderOrderCalendar(orders);
+}
+window.openOrderForm=function(id){editingOrderId=id||null;orderPhotoUrl=id?allOrders[id]?.photoUrl||"":"";document.getElementById("orderFormTitle").textContent=id?"Modifier la commande":"Nouvelle commande";let o=id?allOrders[id]:{};for(let [el,key] of [["orderName","name"],["orderTracking","tracking"],["orderDetail","detail"],["orderPrice","price"],["orderMode","mode"],["orderKg","kg"],["orderCbm","cbm"],["orderPaid","paid"],["orderDate","orderDate"],["orderDepotDate","depotDate"]])document.getElementById(el).value=o[key]??(key==="orderDate"?new Date().toISOString().slice(0,10):"");if(!o.orderDate)document.getElementById("orderDate").value=new Date().toISOString().slice(0,10);document.getElementById("orderPhotoFile").value="";document.getElementById("orderPhotoPreview").innerHTML=orderPhotoUrl?`<img src="${orderEsc(orderPhotoUrl)}">`:"Aucune photo";syncOrderMeasureFields();document.getElementById("orderModal").classList.add("show");};
+window.syncOrderMeasureFields=function(){let mode=document.getElementById("orderMode").value;document.getElementById("orderKgField").style.display=mode==="SEA"?"none":"block";document.getElementById("orderCbmField").style.display=mode==="SEA"?"block":"none"};
+window.closeOrderForm=function(){document.getElementById("orderModal").classList.remove("show")};
+window.editOrder=function(id){openOrderForm(id)};
+window.saveOrder=async function(e){e.preventDefault();let name=document.getElementById("orderName").value.trim(),price=+document.getElementById("orderPrice").value,mode=document.getElementById("orderMode").value;if(!name||price<0||!mode){alert("Vérifie le nom, le prix et le mode d’envoi.");return}let btn=document.getElementById("orderSaveBtn");btn.disabled=true;try{const file=document.getElementById("orderPhotoFile").files[0];if(file)orderPhotoUrl=(await uploadOnePhoto(file)).url;let value={name,tracking:document.getElementById("orderTracking").value.trim(),detail:document.getElementById("orderDetail").value.trim(),price,mode,kg:document.getElementById("orderKg").value,cbm:document.getElementById("orderCbm").value,paid:Math.min(price,+document.getElementById("orderPaid").value||0),orderDate:document.getElementById("orderDate").value,depotDate:document.getElementById("orderDepotDate").value,photoUrl:orderPhotoUrl,userKey:currentUserKey,updatedAt:Date.now()};if(editingOrderId)await update(ref(db,`orders/${editingOrderId}`),value);else await push(ref(db,"orders"),{...value,createdAt:Date.now()});closeOrderForm()}catch(err){alert(err.message||"Enregistrement impossible")}finally{btn.disabled=false}};
+window.setOrderTransit=async function(id){let today=new Date().toISOString().slice(0,10),date=prompt("Date de départ en transit (AAAA-MM-JJ) :",today);if(!date)return;if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){alert("Saisis la date au format AAAA-MM-JJ.");return}await update(ref(db,`orders/${id}`),{transitDate:date,updatedAt:Date.now()})};
+window.addOrderPayment=async function(id){let o=allOrders[id],due=Math.max(0,(+o.price||0)-(+o.paid||0));let value=prompt(`Reste à payer : ${formatAr(due)}\nMontant reçu :`,"");if(value===null)return;let amount=+value;if(!amount||amount<0){alert("Saisis un montant valide.");return}let paid=Math.min(+o.price,(+o.paid||0)+amount);if(!confirm(`Paiement enregistré : ${formatAr(paid)} payé, ${formatAr(Math.max(0,+o.price-paid))} restant. Confirmer ?`))return;await update(ref(db,`orders/${id}`),{paid,updatedAt:Date.now()})};
+window.deleteOrder=async function(id){if(!confirm(`Supprimer la commande « ${allOrders[id]?.name||""} » ? Cette action est définitive.`))return;await remove(ref(db,`orders/${id}`))};
+window.changeOrderMonth=function(delta){orderCalendarMonth=new Date(orderCalendarMonth.getFullYear(),orderCalendarMonth.getMonth()+delta,1);renderOrders()};window.clearOrderDate=function(){selectedOrderDate="";renderOrders()};
+function renderOrderCalendar(orders){let box=document.getElementById("orderCalendar");if(!box)return;let y=orderCalendarMonth.getFullYear(),m=orderCalendarMonth.getMonth();document.getElementById("orderMonthTitle").textContent=new Intl.DateTimeFormat("fr-FR",{month:"long",year:"numeric"}).format(orderCalendarMonth);let names=["L","M","M","J","V","S","D"],first=new Date(y,m,1),offset=(first.getDay()+6)%7,start=new Date(y,m,1-offset),days=names.map(n=>`<span class="order-weekday">${n}</span>`).join("");for(let i=0;i<42;i++){let d=new Date(start);d.setDate(start.getDate()+i);let key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`,n=orders.filter(o=>o.transitDate===key).length;days+=`<button class="order-day ${d.getMonth()!==m?'other-month':''} ${n?'has-departure':''} ${selectedOrderDate===key?'selected-day':''}" onclick="selectOrderCalendarDate('${key}')">${d.getDate()}${n?`<i>${n}</i>`:''}</button>`}box.innerHTML=days}
+window.selectOrderCalendarDate=function(date){selectedOrderDate=selectedOrderDate===date?"":date;renderOrders()};
+document.getElementById("orderPhotoFile")?.addEventListener("change",e=>{let f=e.target.files[0];if(!f)return;let reader=new FileReader();reader.onload=()=>document.getElementById("orderPhotoPreview").innerHTML=`<img src="${reader.result}">`;reader.readAsDataURL(f)});
+
 window.openTab = function(id,btn){
   document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
@@ -4272,6 +4331,7 @@ window.openTab = function(id,btn){
   btn.classList.add("active");
   if(id === "frais") renderFraisInputs();
   if(id === "expeditions"){ renderExpeditionModeButtons(); renderExpeditions(); }
+  if(id === "commandes") renderOrders();
   if(id === "parametres"){ renderVisualSettingsPanel(); applyVisualSettings(); }
   window.scrollTo({top:0,behavior:"smooth"});
 }
@@ -4296,6 +4356,10 @@ window.openTabById = function(id){
 
 
 <style>
+.orders-hero{background:linear-gradient(120deg,#10243d,#173e63 70%,#f07832)!important;color:#fff!important;border:0!important;overflow:hidden}.orders-hero h2,.orders-hero .count{color:#fff!important}.orders-eyebrow{font-size:10px;letter-spacing:2px;font-weight:900;color:#f9a66f}.orders-add{width:auto!important;background:#f07832!important;box-shadow:none!important}.order-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:22px}.order-stats>div{padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.11);display:flex;flex-direction:column;gap:3px}.order-stats b{font-size:20px;color:#fff}.order-stats span{font-size:11px;color:#d6e2ed}.orders-toolbar{display:grid;grid-template-columns:minmax(180px,1fr) 180px 180px;gap:10px}.orders-toolbar input,.orders-toolbar select{margin:0;height:44px}.order-mode-counts{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}.mode-count-pill{display:flex;gap:8px;align-items:center;padding:9px 12px;border:1px solid #e3e9ef;border-radius:12px;background:#f8fafc;color:#10243d;font-size:12px}.mode-count-pill span{color:#64748b;font-weight:650}.orders-layout{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(290px,.8fr);gap:16px}.orders-list-card,.orders-calendar-card{min-width:0}.order-card{display:flex;gap:14px;padding:15px 0;border-bottom:1px solid #e9edf1}.order-card:last-child{border-bottom:0}.order-card.order-alert{margin:4px -8px;padding:12px 8px;background:#fff8ef;border-radius:14px}.order-thumb{width:72px;height:72px;object-fit:cover;border-radius:14px;flex:none;cursor:zoom-in;background:#eef2f4}.order-no-photo{display:grid;place-items:center;font-size:28px;cursor:default}.order-main{min-width:0;flex:1}.order-title-row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.order-title-row h3{margin:0 0 3px;color:#10243d;font-size:16px}.order-tracking,.order-detail,.order-meta{font-size:12px;color:#64748b}.order-detail{margin:8px 0}.order-state{white-space:nowrap;border-radius:999px;padding:6px 9px;font-size:9px;font-weight:950;letter-spacing:.5px}.state-depot{background:#fff0dd;color:#a34d0c}.state-transit{background:#e5f2ff;color:#14549a}.order-meta{display:flex;gap:12px;flex-wrap:wrap;margin:9px 0}.order-payline{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:#445469}.due-money{color:#ba4d22}.order-alert-text{margin-top:8px;color:#ac4f13;font-size:11px;font-weight:850}.order-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.order-actions button{padding:8px 10px;font-size:11px;border-radius:10px}.transit-button{background:#102f4e;color:#fff}.order-delete{background:#fff1ee;color:#ac3926}.orders-empty{padding:35px 12px;text-align:center;color:#778397}.calendar-nav{display:flex;align-items:center;gap:8px}.calendar-nav button{padding:6px 11px}.calendar-nav b{font-size:12px;text-transform:capitalize}.order-calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin-top:14px}.order-weekday{text-align:center;color:#778397;font-size:10px;font-weight:800;padding:6px 0}.order-day{position:relative;min-height:38px;padding:5px 2px;border-radius:10px;background:#f7f9fb;color:#34445a;font-size:12px}.order-day.other-month{opacity:.35}.order-day.has-departure{background:#fff0e5;color:#a84c12;font-weight:900}.order-day i{position:absolute;top:1px;right:3px;min-width:13px;height:13px;border-radius:99px;background:#ef7833;color:white;font-size:8px;font-style:normal;line-height:13px}.order-day.selected-day{background:#173e63;color:#fff}.calendar-clear{width:100%;margin-top:10px}.calendar-hint{font-size:11px;color:#758397;margin-top:10px}.order-modal{display:none;position:fixed;inset:0;background:rgba(10,26,44,.58);z-index:120;align-items:center;justify-content:center;padding:18px}.order-modal.show{display:flex}.order-form{width:min(650px,100%);max-height:92vh;overflow:auto;border-radius:22px;background:#fff;padding:22px;box-shadow:0 26px 80px #06182c55}.order-form h2{margin:4px 0 12px;color:#10243d}.order-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}.order-form-grid label{font-size:12px;font-weight:800;color:#34445a}.order-form-grid input,.order-form-grid select,.order-form-grid textarea{margin:6px 0 0;padding:10px 12px;border-radius:11px}.order-wide{grid-column:1/-1}.order-photo-preview{display:block;min-height:60px;margin-top:8px;color:#778397;font-size:12px}.order-photo-preview img{width:70px;height:70px;object-fit:cover;border-radius:12px}.order-form-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}.order-form-actions button{width:auto!important}.orders-eyebrow{display:block}#commandes{color:#10243d}#commandes>.card,#commandes .orders-layout>.card{background:#fff!important;border:1px solid #e4e9ee!important;box-shadow:0 8px 24px rgba(16,36,61,.055)!important;border-radius:18px!important}#commandes>.orders-hero{background:linear-gradient(120deg,#10243d,#173e63 70%,#f07832)!important}#commandes h2{color:#10243d}#commandes .orders-hero h2{color:white}#commandes .tabs button[data-tab="commandes"] .ico{font-size:23px;color:inherit}
+body{background:#f3f5f6!important;color:#1d2b3b!important}body:before{display:none!important}.top{background:#10243d!important;box-shadow:0 6px 22px #10243d20!important}.hero{background:linear-gradient(115deg,#10243d,#173e63 72%,#ed7838)!important}.primary{background:#ed7838!important;box-shadow:0 10px 24px #ed783833!important}.tabs{background:#fff!important;border-color:#e0e6eb!important}.tabs button.active{background:#10243d!important;box-shadow:0 12px 24px #10243d26!important}.tabs button.active .ico{background:#ed7838!important}
+@media(max-width:900px){.order-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.orders-toolbar{grid-template-columns:1fr 1fr}.orders-toolbar input{grid-column:1/-1}.orders-layout{grid-template-columns:1fr}.orders-calendar-card{order:-1}.order-thumb{width:58px;height:58px}.order-meta{gap:6px 10px}.tabs{grid-template-columns:repeat(3,1fr)!important;bottom:8px!important;left:8px!important;right:8px!important;width:auto!important;height:auto!important;min-height:78px!important}.tabs button{font-size:10px!important}}
+@media(max-width:520px){.order-form-grid{grid-template-columns:1fr}.order-wide{grid-column:auto}.order-form{padding:16px}.order-title-row{flex-direction:column}.order-state{align-self:flex-start}.order-payline{flex-direction:column}.order-actions button{flex:1}.orders-hero .card-title-row{align-items:flex-start}.orders-add{font-size:12px!important;padding:10px!important}.mode-count-pill{width:100%;justify-content:space-between}}
 .floating-add-btn{display:none;position:fixed;right:22px;bottom:100px;width:58px;height:58px;border-radius:999px!important;background:linear-gradient(135deg,#2563eb,#4f46e5)!important;color:white!important;font-size:34px!important;font-weight:900!important;box-shadow:0 14px 30px rgba(37,99,235,.26)!important;z-index:90;padding:0!important;}
 body:has(#articles.section.active) .floating-add-btn{display:grid;place-items:center;}
 @media(max-width:980px){.floating-add-btn{bottom:96px;right:16px}}
