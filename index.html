@@ -2890,6 +2890,9 @@ body{
 
 <div id="app" class="app">
 
+  <button class="menu-toggle" aria-label="Ouvrir le menu" onclick="toggleMainMenu()">☰</button>
+  <div class="menu-backdrop" id="menuBackdrop" onclick="toggleMainMenu(false)"></div>
+
   <div class="top">
     <div class="top-row">
       <button class="user-btn" onclick="changeUser()">Changer utilisateur</button>
@@ -3043,18 +3046,19 @@ body{
         <div class="card-title-row"><div><span class="orders-eyebrow">KIAH · PILOTAGE</span><h2>Commandes export</h2><div class="count">Suivi simple, du dépôt au transit.</div></div><button class="primary orders-add" onclick="openOrderForm()">＋ Nouvelle commande</button></div>
         <div class="order-stats" id="orderStats"></div>
       </div>
+      <div class="orders-inner-tabs"><button id="ordersTabBtn" class="active" onclick="switchOrdersView('orders')">📦 Commandes</button><button id="dispatchTabBtn" onclick="switchOrdersView('dispatch')">↗ Dispatch / Suivi</button></div>
+      <div id="orderViewCommands">
       <div class="card">
         <div class="orders-toolbar"><input id="orderSearch" placeholder="⌕  Nom ou numéro de suivi" oninput="renderOrders()"><select id="orderModeFilter" onchange="renderOrders()"><option value="">Tous les modes</option><option>SEA</option><option>AIR</option><option>EXP</option></select><select id="orderStatusFilter" onchange="renderOrders()"><option value="">Tous les statuts</option><option value="depot">Au dépôt</option><option value="transit">En transit</option><option value="pay">À payer</option></select></div>
         <div class="order-mode-counts" id="orderModeCounts"></div>
       </div>
       <div class="card orders-list-card"><div class="card-title-row"><h2 id="ordersListTitle">Toutes les commandes</h2><span class="count" id="ordersCount"></span></div><div id="ordersList"></div></div>
       </div>
-    </div>
-
-    <div id="dispatch" class="section">
-      <div class="card orders-hero"><div class="card-title-row"><div><span class="orders-eyebrow">KIAH · SUIVI</span><h2>Dispatch / Suivi</h2><div class="count">Départs par mode et par date.</div></div></div><div class="order-stats" id="dispatchStats"></div></div>
+      <div id="orderViewDispatch" style="display:none">
+        <div class="card orders-hero"><div class="card-title-row"><div><span class="orders-eyebrow">KIAH · SUIVI</span><h2>Dispatch / Suivi</h2><div class="count">Départs par mode et par date.</div></div></div><div class="order-stats" id="dispatchStats"></div></div>
         <div class="card"><div class="orders-toolbar"><select id="dispatchModeFilter" onchange="renderOrders()"><option value="">Tous les modes</option><option>SEA</option><option>AIR</option><option>EXP</option></select><div class="dispatch-status-switch"><button class="active" id="dispatchDepotBtn" onclick="setDispatchStatus('depot')">Au dépôt</button><button id="dispatchTransitBtn" onclick="setDispatchStatus('transit')">En transit</button></div></div></div>
         <div class="orders-layout"><div class="card orders-list-card"><div class="card-title-row"><h2 id="dispatchListTitle">Au dépôt</h2><span class="count" id="dispatchCount"></span></div><div id="dispatchList"></div></div><div class="card orders-calendar-card"><div class="card-title-row"><h2>Départs en transit</h2><div class="calendar-nav"><button class="secondary" onclick="changeOrderMonth(-1)">‹</button><b id="orderMonthTitle"></b><button class="secondary" onclick="changeOrderMonth(1)">›</button></div></div><div class="order-calendar" id="orderCalendar"></div><button class="secondary calendar-clear" onclick="clearOrderDate()">Voir tous les jours</button><div class="calendar-hint">Les points indiquent les jours avec des départs.</div></div></div>
+      </div>
     </div>
 
     <div id="parametres" class="section">
@@ -3090,7 +3094,6 @@ body{
   <div class="tabs">
     <button data-tab="frais" onclick="openTab('frais',this)"><span class="ico"><img src="icons/briefcase.svg" alt=""></span>Frais</button>
     <button class="active" data-tab="commandes" onclick="openTab('commandes',this)"><span class="ico">📦</span>Commandes</button>
-    <button data-tab="dispatch" onclick="openTab('dispatch',this)"><span class="ico">↗</span>Dispatch</button>
   </div>
 </div>
 
@@ -4320,6 +4323,8 @@ function renderOrders(){
  renderOrderCalendar(orders);
 }
 window.setDispatchStatus=function(status){dispatchStatus=status;document.getElementById("dispatchDepotBtn").classList.toggle("active",status==="depot");document.getElementById("dispatchTransitBtn").classList.toggle("active",status==="transit");renderOrders()};
+window.switchOrdersView=function(view){ordersView=view;document.getElementById("orderViewCommands").style.display=view==="orders"?"block":"none";document.getElementById("orderViewDispatch").style.display=view==="dispatch"?"block":"none";document.getElementById("ordersTabBtn").classList.toggle("active",view==="orders");document.getElementById("dispatchTabBtn").classList.toggle("active",view==="dispatch");document.getElementById("orderStats").closest(".orders-hero").style.display=view==="orders"?"block":"none";renderOrders()};
+window.toggleMainMenu=function(force){let menu=document.querySelector(".tabs"),open=typeof force==="boolean"?force:!menu.classList.contains("menu-open");menu.classList.toggle("menu-open",open);document.getElementById("menuBackdrop").classList.toggle("show",open)};
 window.openOrderForm=function(id){editingOrderId=id||null;orderPhotoUrl=id?allOrders[id]?.photoUrl||"":"";document.getElementById("orderFormTitle").textContent=id?"Modifier la commande":"Nouvelle commande";let o=id?allOrders[id]:{};for(let [el,key] of [["orderName","name"],["orderTracking","tracking"],["orderDetail","detail"],["orderPrice","price"],["orderMode","mode"],["orderKg","kg"],["orderCbm","cbm"],["orderPaid","paid"],["orderDate","orderDate"],["orderDepotDate","depotDate"]])document.getElementById(el).value=o[key]??(key==="orderDate"?new Date().toISOString().slice(0,10):"");if(!o.orderDate)document.getElementById("orderDate").value=new Date().toISOString().slice(0,10);document.getElementById("orderPhotoFile").value="";document.getElementById("orderPhotoPreview").innerHTML=orderPhotoUrl?`<img src="${orderEsc(orderPhotoUrl)}">`:"Aucune photo";syncOrderMeasureFields();document.getElementById("orderModal").classList.add("show");};
 window.syncOrderMeasureFields=function(){let mode=document.getElementById("orderMode").value;document.getElementById("orderKgField").style.display=mode==="SEA"?"none":"block";document.getElementById("orderCbmField").style.display=mode==="SEA"?"block":"none"};
 window.closeOrderForm=function(){document.getElementById("orderModal").classList.remove("show")};
@@ -4334,10 +4339,12 @@ window.selectOrderCalendarDate=function(date){selectedOrderDate=selectedOrderDat
 document.getElementById("orderPhotoFile")?.addEventListener("change",e=>{let f=e.target.files[0];if(!f)return;let reader=new FileReader();reader.onload=()=>document.getElementById("orderPhotoPreview").innerHTML=`<img src="${reader.result}">`;reader.readAsDataURL(f)});
 
 window.openTab = function(id,btn){
+  if(id==="dispatch"){id="commandes";switchOrdersView("dispatch");btn=document.querySelector('.tabs button[data-tab="commandes"]')}
   document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
   document.querySelectorAll(".tabs button").forEach(b=>b.classList.remove("active"));
   btn.classList.add("active");
+  toggleMainMenu(false);
   if(id === "frais") renderFraisInputs();
   if(id === "expeditions"){ renderExpeditionModeButtons(); renderExpeditions(); }
   if(id === "commandes" || id === "dispatch") renderOrders();
@@ -4372,6 +4379,10 @@ window.openTabById = function(id){
 .floating-add-btn{display:none;position:fixed;right:22px;bottom:100px;width:58px;height:58px;border-radius:999px!important;background:linear-gradient(135deg,#2563eb,#4f46e5)!important;color:white!important;font-size:34px!important;font-weight:900!important;box-shadow:0 14px 30px rgba(37,99,235,.26)!important;z-index:90;padding:0!important;}
 body:has(#articles.section.active) .floating-add-btn{display:grid;place-items:center;}
 @media(max-width:980px){.floating-add-btn{bottom:96px;right:16px}}
+</style>
+<style>
+.menu-toggle{position:fixed!important;left:14px;top:14px;z-index:131;width:46px;height:46px;padding:0!important;border-radius:13px!important;background:#10243d!important;color:#fff!important;box-shadow:0 8px 20px #10243d33!important;font-size:21px!important}.menu-backdrop{display:none;position:fixed;inset:0;background:#07182b66;z-index:119}.menu-backdrop.show{display:block}.tabs{position:fixed!important;left:0!important;top:0!important;bottom:0!important;right:auto!important;width:268px!important;height:100vh!important;display:flex!important;flex-direction:column!important;transform:translateX(-105%)!important;transition:transform .22s ease!important;z-index:120!important;overflow:auto!important}.tabs.menu-open{transform:translateX(0)!important}.tabs button{flex:none!important}.top{margin-left:0!important;padding-left:56px!important}.container{margin-left:0!important;padding-left:22px!important;padding-right:22px!important;max-width:1500px!important}.orders-inner-tabs{display:flex!important;gap:8px;margin:0 0 14px;padding:5px;border:1px solid #e2e8ef;border-radius:14px;background:#fff;width:max-content}.orders-inner-tabs button{width:auto;background:transparent;color:#40516a;padding:10px 16px;border-radius:10px}.orders-inner-tabs button.active{background:#10243d;color:#fff}.dispatch-status-switch{justify-content:flex-start}.dispatch-status-switch button{width:auto!important}
+@media(max-width:900px){.tabs{top:0!important;bottom:0!important;left:0!important;right:auto!important;width:268px!important;height:100vh!important;display:flex!important;grid-template-columns:none!important;flex-direction:column!important;padding:22px 16px!important;border-radius:0!important;transform:translateX(-105%)!important}.tabs.menu-open{transform:translateX(0)!important}.container{margin:0!important;padding:14px!important;padding-bottom:104px!important}.top{padding-left:56px!important}.orders-inner-tabs{width:100%;display:grid!important;grid-template-columns:1fr 1fr}.orders-inner-tabs button{font-size:12px!important;padding:10px 8px}}
 </style>
 </body>
 </html>
