@@ -4346,7 +4346,8 @@ window.deleteOrder=async function(id){if(!confirm(`Supprimer la commande « ${al
 window.changeOrderMonth=function(delta){orderCalendarMonth=new Date(orderCalendarMonth.getFullYear(),orderCalendarMonth.getMonth()+delta,1);renderOrders()};window.clearOrderDate=function(){selectedOrderDate="";renderOrders()};
 function renderOrderCalendar(orders){let box=document.getElementById("orderCalendar");if(!box)return;let y=orderCalendarMonth.getFullYear(),m=orderCalendarMonth.getMonth();document.getElementById("orderMonthTitle").textContent=new Intl.DateTimeFormat("fr-FR",{month:"long",year:"numeric"}).format(orderCalendarMonth);let names=["L","M","M","J","V","S","D"],first=new Date(y,m,1),offset=(first.getDay()+6)%7,start=new Date(y,m,1-offset),days=names.map(n=>`<span class="order-weekday">${n}</span>`).join("");for(let i=0;i<42;i++){let d=new Date(start);d.setDate(start.getDate()+i);let key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`,n=orders.filter(o=>o.transitDate===key).length;days+=`<button class="order-day ${d.getMonth()!==m?'other-month':''} ${n?'has-departure':''} ${selectedOrderDate===key?'selected-day':''}" onclick="selectOrderCalendarDate('${key}')">${d.getDate()}${n?`<i>${n}</i>`:''}</button>`}box.innerHTML=days}
 window.selectOrderCalendarDate=function(date){selectedOrderDate=selectedOrderDate===date?"":date;dispatchStatus="transit";document.getElementById("dispatchDepotBtn").classList.remove("active");document.getElementById("dispatchTransitBtn").classList.add("active");renderOrders()};
-["orderKg","orderCbm"].forEach(id=>document.getElementById(id)?.addEventListener("input",renderOrderEstimate));\ndocument.getElementById("orderPhotoFile")?.addEventListener("change",e=>{let f=e.target.files[0];if(!f)return;let reader=new FileReader();reader.onload=()=>document.getElementById("orderPhotoPreview").innerHTML=`<img src="${reader.result}">`;reader.readAsDataURL(f)});
+["orderKg","orderCbm"].forEach(id=>document.getElementById(id)?.addEventListener("input",renderOrderEstimate));
+document.getElementById("orderPhotoFile")?.addEventListener("change",e=>{let f=e.target.files[0];if(!f)return;let reader=new FileReader();reader.onload=()=>document.getElementById("orderPhotoPreview").innerHTML=`<img src="${reader.result}">`;reader.readAsDataURL(f)});
 
 window.openTab = function(id,btn){
   if(id==="dispatch"){id="commandes";switchOrdersView("dispatch");btn=document.querySelector('.tabs button[data-tab="commandes"]')}
@@ -4411,6 +4412,7 @@ body{background:#f2f4f6!important;color:#172b43!important;font-family:Inter,"Seg
 </style>
 </body>
 </html>
+
 
 
 
